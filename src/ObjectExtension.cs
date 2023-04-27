@@ -5,12 +5,16 @@ using System.Net.Http;
 using System.Net.Mime;
 using System.Reflection;
 using System.Text;
+using Soenneker.Constants.Auth;
 using Soenneker.Extensions.Type;
 using Soenneker.Utils.Json;
 using Soenneker.Utils.Json.Abstract;
 
 namespace Soenneker.Extensions.Object;
 
+/// <summary>
+/// A collection of helpful Object extension methods
+/// </summary>
 public static class ObjectExtension
 {
     /// <summary>
@@ -54,5 +58,17 @@ public static class ObjectExtension
         );
 
         return dictionary;
+    }
+
+    /// <summary>
+    /// <see cref="ToHttpContent"/> and then adds the 'x-api-key' header to the request
+    /// </summary>
+    [Pure]
+    public static HttpContent ToHttpContentWithKey(this object? obj, string apiKey)
+    {
+        var httpContent = obj.ToHttpContent();
+        httpContent.Headers.Add(AuthConstants.XApiKey, apiKey);
+
+        return httpContent;
     }
 }

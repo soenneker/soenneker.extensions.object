@@ -7,8 +7,16 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Soenneker.Extensions.Object.Tests", "test\Soenneker.Extensions.Object.Tests.csproj", "{6456E465-9523-4612-9115-9D9B585B42E8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{75EF04C6-3A67-4970-B219-51B0D824CE4A}"
+	ProjectSection(SolutionItems) = preProject
+		.github\dependabot.yml = .github\dependabot.yml
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{6EAC9697-95FA-4318-8B0C-93693E36D342}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\automerge.yml = .github\workflows\automerge.yml
+		.github\workflows\buildandtest.yml = .github\workflows\buildandtest.yml
+		.github\workflows\publish.yml = .github\workflows\publish.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
