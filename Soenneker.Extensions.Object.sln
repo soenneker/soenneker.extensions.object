@@ -16,6 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 		.github\workflows\automerge.yml = .github\workflows\automerge.yml
 		.github\workflows\buildandtest.yml = .github\workflows\buildandtest.yml
 		.github\workflows\publish.yml = .github\workflows\publish.yml
+		.github\workflows\reenable-automerge.yml = .github\workflows\reenable-automerge.yml
 	EndProjectSection
 EndProject
 Global
