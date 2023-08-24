@@ -40,7 +40,7 @@
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
 
         <PackageReference Include="Soenneker.Constants.Auth" Version="1.0.52" />
-        <PackageReference Include="Soenneker.Extensions.Type" Version="1.0.48" />
+        <PackageReference Include="Soenneker.Extensions.Type" Version="1.0.49" />
         <PackageReference Include="Soenneker.Utils.Json" Version="1.0.189" />
     </ItemGroup>
 </Project>
