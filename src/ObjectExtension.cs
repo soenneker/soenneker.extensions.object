@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http;
@@ -6,6 +7,7 @@ using System.Net.Mime;
 using System.Reflection;
 using System.Text;
 using Soenneker.Constants.Auth;
+using Soenneker.Extensions.String;
 using Soenneker.Extensions.Type;
 using Soenneker.Utils.Json;
 using Soenneker.Utils.Json.Abstract;
@@ -70,5 +72,42 @@ public static class ObjectExtension
         httpContent.Headers.Add(AuthConstants.XApiKey, apiKey);
 
         return httpContent;
+    }
+
+    /// <summary>
+    /// Builds a query string out of an object. If object is null, returns an empty string.
+    /// </summary>
+    /// <remarks>This string's first character is a question mark (unless the object is null, then it's null)</remarks>
+    [Pure]
+    public static string ToQueryString(this object? obj, bool loweredPropertyNames = true)
+    {
+        if (obj == null)
+            return "";
+
+        var queryString = new StringBuilder();
+        System.Type type = obj.GetType();
+        PropertyInfo[] properties = type.GetProperties();
+
+        foreach (PropertyInfo property in properties)
+        {
+            object? value = property.GetValue(obj);
+
+            if (value == null) 
+                continue;
+            
+            if (queryString.Length > 0)
+                queryString.Append('&');
+
+            string propertyName = property.Name.ToEscaped()!;
+
+            if (loweredPropertyNames)
+                propertyName = propertyName.ToLowerInvariant();
+
+            queryString.Append(propertyName);
+            queryString.Append('=');
+            queryString.Append(value.ToString().ToEscaped());
+        }
+
+        return '?' + queryString.ToString();
     }
 }
