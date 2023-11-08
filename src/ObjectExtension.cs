@@ -19,9 +19,9 @@ namespace Soenneker.Extensions.Object;
 /// </summary>
 public static class ObjectExtension
 {
-    /// <summary>
-    /// Returns a application/json HttpContent, with JsonUtil.WebOptions. If the object is null, returns a new HttpContent with empty content
-    /// </summary>
+    /// <returns>An application/json HttpContent, with JsonUtil.WebOptions. <para/>
+    /// If the object is null, returns a new HttpContent with empty content.
+    /// </returns>
     /// <remarks>Will not log result, see <see cref="IJsonUtil"/> for that</remarks>
     [Pure]
     public static HttpContent ToHttpContent(this object? obj)
@@ -37,6 +37,27 @@ public static class ObjectExtension
         string? stringContent = JsonUtil.Serialize(obj);
         result = new StringContent(stringContent!, Encoding.UTF8, MediaTypeNames.Application.Json);
         return result;
+    }
+
+    /// <returns>An application/json HttpContent, with JsonUtil.WebOptions. <para/>
+    /// If the object is null, returns a new HttpContent with empty content. <para/>
+    /// Also returns the serialized string that was used to construct the HttpContent.
+    /// </returns>
+    [Pure]
+    public static (HttpContent httpContent, string str) ToHttpContentAndString(this object? obj)
+    {
+        StringContent result;
+
+        if (obj == null)
+        {
+            const string resultStr = "";
+            result = new StringContent(resultStr, Encoding.UTF8, MediaTypeNames.Application.Json);
+            return (result, resultStr);
+        }
+
+        string stringContent = JsonUtil.Serialize(obj)!;
+        result = new StringContent(stringContent, Encoding.UTF8, MediaTypeNames.Application.Json);
+        return (result, stringContent);
     }
 
     [Pure]
