@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Mime;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using Soenneker.Constants.Auth;
 using Soenneker.Extensions.String;
 using Soenneker.Extensions.Type;
@@ -96,18 +96,19 @@ public static class ObjectExtension
     }
 
     /// <summary>
-    /// Builds a query string out of an object. If object is null, returns an empty string.
+    /// Uses Reflection to build a query string out of an object. If object is null, returns an empty string. Uses the object's property names as the keys of the query string.
     /// </summary>
     /// <remarks>This string's first character is a question mark (unless the object is null, then it's null)</remarks>
     [Pure]
-    public static string ToQueryString(this object? obj, bool loweredPropertyNames = true)
+    public static string ToQueryStringViaReflection(this object? obj, bool loweredPropertyNames = true)
     {
         if (obj == null)
             return "";
 
-        var queryString = new StringBuilder();
         System.Type type = obj.GetType();
         PropertyInfo[] properties = type.GetProperties();
+
+        var queryString = new StringBuilder();
 
         foreach (PropertyInfo property in properties)
         {
@@ -116,19 +117,45 @@ public static class ObjectExtension
             if (value == null) 
                 continue;
             
-            if (queryString.Length > 0)
-                queryString.Append('&');
-
             string propertyName = property.Name.ToEscaped()!;
 
             if (loweredPropertyNames)
                 propertyName = propertyName.ToLowerInvariant();
 
-            queryString.Append(propertyName);
-            queryString.Append('=');
-            queryString.Append(value.ToString().ToEscaped());
+            queryString.AppendJoin('&', propertyName, "=", value.ToString().ToEscaped());
         }
 
         return '?' + queryString.ToString();
+    }
+
+    /// <summary>
+    /// Builds a query string out of an object by serializing the object and then deserializing into a Dictionary. <para/>
+    /// Uses the object's property name OR 'JsonPropertyName' attribute as the keys of the query string. Escapes the value. <para/>
+    /// This is recommended over <see cref="ToQueryStringViaReflection"/> as it's slightly faster. <para/>
+    /// </summary>
+    /// <remarks>This string's first character is a question mark (unless the object is null, then it's null)</remarks>
+    /// <returns>If object is null, returns an empty string.</returns>
+    [Pure]
+    public static string ToQueryString(this object? obj)
+    {
+        if (obj == null)
+            return "";
+
+        string? serializedObj = JsonUtil.Serialize(obj);
+        var dictionary = JsonUtil.Deserialize<Dictionary<string, JsonElement>>(serializedObj!);
+
+        if (dictionary == null)
+            return "";
+
+        var queryParameters = new List<string>();
+
+        foreach (KeyValuePair<string, JsonElement> qs in dictionary)
+        {
+            queryParameters.Add($"{qs.Key}={qs.Value.ToString().ToEscaped()}");
+        }
+
+        string query = string.Join("&", queryParameters);
+
+        return '?' + query;
     }
 }

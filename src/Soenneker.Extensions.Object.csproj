@@ -36,11 +36,9 @@
         <None Include="..\README.md" Pack="true" PackagePath="\" />
         <None Include="..\LICENSE" Pack="true" PackagePath="\" />
         <None Include="..\icon.png" Pack="true" PackagePath="\" />
-
         
-
         <PackageReference Include="Soenneker.Constants.Auth" Version="2.1.36" />
-        <PackageReference Include="Soenneker.Extensions.Type" Version="2.1.39" />
-        <PackageReference Include="Soenneker.Utils.Json" Version="2.1.147" />
+        <PackageReference Include="Soenneker.Extensions.Type" Version="2.1.40" />
+        <PackageReference Include="Soenneker.Utils.Json" Version="2.1.150" />
     </ItemGroup>
 </Project>
