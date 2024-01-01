@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Mime;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using Soenneker.Constants.Auth;
@@ -64,6 +66,18 @@ public static class ObjectExtension
     public static bool IsObjectNumeric(this object obj)
     {
         return obj.GetType().IsNumeric();
+    }
+
+    /// <summary>
+    /// Throws an <see cref="ArgumentException"/> if the input string is null.
+    /// </summary>
+    /// <param name="input">The input object.</param>
+    /// <param name="name">The name of the calling member.</param>
+    /// <exception cref="ArgumentException">Thrown when the input string is null.</exception>
+    public static void ThrowIfNullOrEmpty(this object? input, [CallerMemberName] string? name = null)
+    {
+        if (input == null)
+            throw new ArgumentException("String cannot be null or empty", name);
     }
 
     [Pure]
