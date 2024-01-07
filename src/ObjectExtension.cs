@@ -74,7 +74,7 @@ public static class ObjectExtension
     /// <param name="input">The input object.</param>
     /// <param name="name">The name of the calling member.</param>
     /// <exception cref="ArgumentException">Thrown when the input string is null.</exception>
-    public static void ThrowIfNullOrEmpty(this object? input, [CallerMemberName] string? name = null)
+    public static void ThrowIfNull(this object? input, [CallerMemberName] string? name = null)
     {
         if (input == null)
             throw new ArgumentException("String cannot be null or empty", name);
