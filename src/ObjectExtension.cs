@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http;
@@ -74,7 +75,7 @@ public static class ObjectExtension
     /// <param name="input">The input object.</param>
     /// <param name="name">The name of the calling member.</param>
     /// <exception cref="ArgumentException">Thrown when the input object is null.</exception>
-    public static void ThrowIfNull(this object? input, [CallerMemberName] string? name = null)
+    public static void ThrowIfNull([NotNull] this object? input, [CallerMemberName] string? name = null)
     {
         if (input == null)
             throw new ArgumentException("Object cannot be null", name);
