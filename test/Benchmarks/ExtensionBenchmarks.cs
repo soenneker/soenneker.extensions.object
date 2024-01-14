@@ -1,5 +1,5 @@
-﻿using AutoBogus;
-using BenchmarkDotNet.Attributes;
+﻿using BenchmarkDotNet.Attributes;
+using Soenneker.Utils.AutoBogus;
 
 namespace Soenneker.Extensions.Object.Tests.Benchmarks;
 
