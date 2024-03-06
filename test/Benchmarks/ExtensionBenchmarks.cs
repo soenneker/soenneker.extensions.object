@@ -5,10 +5,18 @@ namespace Soenneker.Extensions.Object.Tests.Benchmarks;
 
 public class ExtensionBenchmarks
 {
+    private AutoFaker _autoFaker;
+
+    [GlobalSetup]
+    public void SetupData()
+    {
+        _autoFaker = new AutoFaker();
+    }
+
     [Benchmark]
     public void ToQueryString()
     {
-        var user = AutoFaker.Generate<UserDto>();
+        var user = _autoFaker.Generate<UserDto>();
 
         _ = user.ToQueryString();
     }
@@ -16,7 +24,7 @@ public class ExtensionBenchmarks
     [Benchmark]
     public void ToQueryStringViaReflection()
     {
-        var user = AutoFaker.Generate<UserDto>();
+        var user = _autoFaker.Generate<UserDto>();
 
         _ = user.ToQueryStringViaReflection();
     }
