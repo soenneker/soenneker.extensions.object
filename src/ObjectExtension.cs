@@ -29,17 +29,9 @@ public static class ObjectExtension
     [Pure]
     public static HttpContent ToHttpContent(this object? obj)
     {
-        StringContent result;
+        string? jsonContent = obj != null ? JsonUtil.Serialize(obj) : "";
 
-        if (obj == null)
-        {
-            result = new StringContent("", Encoding.UTF8, MediaTypeNames.Application.Json);
-            return result;
-        }
-
-        string? stringContent = JsonUtil.Serialize(obj);
-        result = new StringContent(stringContent!, Encoding.UTF8, MediaTypeNames.Application.Json);
-        return result;
+        return new StringContent(jsonContent!, Encoding.UTF8, MediaTypeNames.Application.Json);
     }
 
     /// <returns>An application/json HttpContent, with JsonUtil.WebOptions. <para/>
@@ -49,18 +41,22 @@ public static class ObjectExtension
     [Pure]
     public static (HttpContent httpContent, string str) ToHttpContentAndString(this object? obj)
     {
-        StringContent result;
+        string? jsonContent = obj != null ? JsonUtil.Serialize(obj) : "";
 
-        if (obj == null)
-        {
-            const string resultStr = "";
-            result = new StringContent(resultStr, Encoding.UTF8, MediaTypeNames.Application.Json);
-            return (result, resultStr);
-        }
+        var content = new StringContent(jsonContent!, Encoding.UTF8, MediaTypeNames.Application.Json);
+        return (content, jsonContent!);
+    }
 
-        string stringContent = JsonUtil.Serialize(obj)!;
-        result = new StringContent(stringContent, Encoding.UTF8, MediaTypeNames.Application.Json);
-        return (result, stringContent);
+    /// <summary>
+    /// <see cref="ToHttpContent"/> and then adds the 'x-api-key' header to the request
+    /// </summary>
+    [Pure]
+    public static HttpContent ToHttpContentWithKey(this object? obj, string apiKey)
+    {
+        var httpContent = obj.ToHttpContent();
+        httpContent.Headers.TryAddWithoutValidation(AuthConstants.XApiKey, apiKey);
+
+        return httpContent;
     }
 
     [Pure]
@@ -99,18 +95,6 @@ public static class ObjectExtension
     }
 
     /// <summary>
-    /// <see cref="ToHttpContent"/> and then adds the 'x-api-key' header to the request
-    /// </summary>
-    [Pure]
-    public static HttpContent ToHttpContentWithKey(this object? obj, string apiKey)
-    {
-        var httpContent = obj.ToHttpContent();
-        httpContent.Headers.Add(AuthConstants.XApiKey, apiKey);
-
-        return httpContent;
-    }
-
-    /// <summary>
     /// Uses Reflection to build a query string out of an object. If object is null, returns an empty string. Uses the object's property names as the keys of the query string.
     /// </summary>
     /// <remarks>This string's first character is a question mark (unless the object is null, then it's null)</remarks>
@@ -121,26 +105,40 @@ public static class ObjectExtension
             return "";
 
         System.Type type = obj.GetType();
-        PropertyInfo[] properties = type.GetProperties();
+        PropertyInfo[] properties = type.GetProperties().Where(prop => prop.CanRead).ToArray();
 
-        var queryString = new StringBuilder();
+        if (properties.Length == 0) 
+            return "";
 
+        var queryString = new StringBuilder(properties.Length * 10);
+
+        var firstParameterAdded = false;
         foreach (PropertyInfo property in properties)
         {
             object? value = property.GetValue(obj);
+            if (value == null) continue;
 
-            if (value == null) 
-                continue;
-            
-            string propertyName = property.Name.ToEscaped()!;
+            if (firstParameterAdded)
+            {
+                queryString.Append('&');
+            }
+            else
+            {
+                firstParameterAdded = true;
+                queryString.Append('?');
+            }
+
+            string propertyName = property.Name.ToEscaped();
 
             if (loweredPropertyNames)
-                propertyName = propertyName.ToLowerInvariant();
+                propertyName = propertyName.ToLowerInvariantFast();
 
-            queryString.AppendJoin('&', propertyName, "=", value.ToString().ToEscaped());
+            queryString.Append(propertyName)
+                .Append('=')
+                .Append(value.ToString().ToEscaped());
         }
 
-        return '?' + queryString.ToString();
+        return queryString.ToString();
     }
 
     /// <summary>
@@ -157,20 +155,30 @@ public static class ObjectExtension
             return "";
 
         string? serializedObj = JsonUtil.Serialize(obj);
-        var dictionary = JsonUtil.Deserialize<Dictionary<string, JsonElement>>(serializedObj!);
 
-        if (dictionary == null)
+        if (serializedObj.IsNullOrEmpty())
             return "";
 
-        var queryParameters = new List<string>();
+        var dictionary = JsonUtil.Deserialize<Dictionary<string, JsonElement>>(serializedObj!);
+
+        if (dictionary == null || dictionary.Count == 0)
+            return "";
+
+        var queryBuilder = new StringBuilder(dictionary.Count * 10);
+        queryBuilder.Append('?');
 
         foreach (KeyValuePair<string, JsonElement> qs in dictionary)
         {
-            queryParameters.Add($"{qs.Key}={qs.Value.ToString().ToEscaped()}");
+            string value = qs.Value.ToString().ToEscaped();
+
+            if (queryBuilder.Length > 1)
+                queryBuilder.Append('&');
+
+            queryBuilder.Append(qs.Key);
+            queryBuilder.Append('=');
+            queryBuilder.Append(value);
         }
 
-        string query = string.Join("&", queryParameters);
-
-        return '?' + query;
+        return queryBuilder.ToString();
     }
 }
