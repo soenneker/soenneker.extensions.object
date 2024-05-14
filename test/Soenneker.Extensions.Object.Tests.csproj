@@ -19,7 +19,7 @@
     <ItemGroup>
         <PackageReference Include="BenchmarkDotNet" Version="0.13.12" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
-        <PackageReference Include="Soenneker.Facts.Local" Version="2.1.252" />
+        <PackageReference Include="Soenneker.Facts.Local" Version="2.1.253" />
         <PackageReference Include="Soenneker.Facts.Manual" Version="2.1.106" />
         <PackageReference Include="xunit.runner.visualstudio" Version="2.8.0">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
