@@ -31,7 +31,8 @@ public static class ObjectExtension
     {
         string? jsonContent = obj != null ? JsonUtil.Serialize(obj) : "";
 
-        return new StringContent(jsonContent!, Encoding.UTF8, MediaTypeNames.Application.Json);
+        var result = new StringContent(jsonContent!, Encoding.UTF8, MediaTypeNames.Application.Json);
+        return result;
     }
 
     /// <returns>An application/json HttpContent, with JsonUtil.WebOptions. <para/>
@@ -66,15 +67,15 @@ public static class ObjectExtension
     }
 
     /// <summary>
-    /// Throws an <see cref="ArgumentException"/> if the input object is null.
+    /// Throws an <see cref="ArgumentNullException"/> if the input object is null.
     /// </summary>
     /// <param name="input">The input object.</param>
     /// <param name="name">The name of the calling member.</param>
-    /// <exception cref="ArgumentException">Thrown when the input object is null.</exception>
+    /// <exception cref="ArgumentNullException">Thrown when the input object is null.</exception>
     public static void ThrowIfNull([NotNull] this object? input, [CallerMemberName] string? name = null)
     {
         if (input == null)
-            throw new ArgumentException("Object cannot be null", name);
+            throw new ArgumentNullException(name);
     }
 
     [Pure]
@@ -107,7 +108,7 @@ public static class ObjectExtension
         System.Type type = obj.GetType();
         PropertyInfo[] properties = type.GetProperties().Where(prop => prop.CanRead).ToArray();
 
-        if (properties.Length == 0) 
+        if (properties.Length == 0)
             return "";
 
         var queryString = new StringBuilder(properties.Length * 10);
