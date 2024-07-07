@@ -72,6 +72,7 @@ public static class ObjectExtension
     /// <param name="input">The input object.</param>
     /// <param name="name">The name of the calling member.</param>
     /// <exception cref="ArgumentNullException">Thrown when the input object is null.</exception>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void ThrowIfNull([NotNull] this object? input, [CallerMemberName] string? name = null)
     {
         if (input == null)
