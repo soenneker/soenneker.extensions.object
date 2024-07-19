@@ -32,4 +32,14 @@ public class ObjectExtensionTests : FixturedUnitTest
         string result = user.ToQueryString();
         result.Should().NotContain("firstName");
     }
+
+    [Fact]
+    public void ToQueryString_lowercase_bool()
+    {
+        var user = AutoFaker.Generate<UserDto>();
+        user.IsActive = true;
+
+        string result = user.ToQueryString();
+        result.Should().NotContain("True");
+    }
 }

@@ -158,7 +158,7 @@ public static class ObjectExtension
 
         string? serializedObj = JsonUtil.Serialize(obj);
 
-        if (serializedObj.IsNullOrEmpty())
+        if (string.IsNullOrEmpty(serializedObj))
             return "";
 
         var dictionary = JsonUtil.Deserialize<Dictionary<string, JsonElement>>(serializedObj!);
@@ -171,7 +171,12 @@ public static class ObjectExtension
 
         foreach (KeyValuePair<string, JsonElement> qs in dictionary)
         {
-            string value = qs.Value.ToString().ToEscaped();
+            string value = qs.Value.ValueKind switch
+            {
+                JsonValueKind.True => "true",
+                JsonValueKind.False => "false",
+                _ => qs.Value.ToString().ToEscaped()
+            };
 
             if (queryBuilder.Length > 1)
                 queryBuilder.Append('&');
