@@ -214,7 +214,7 @@ public static class ObjectExtension
     {
         if (obj == null)
         {
-            logger.LogWarning("LogNullProperties: Object is null.");
+            logger.LogWarning("LogNullProperties: Object is null");
             return;
         }
 
@@ -236,7 +236,7 @@ public static class ObjectExtension
         }
         else
         {
-            logger.LogInformation("LogNullProperties: Type: {parentType}, No null properties found.", objectType.FullName);
+            logger.LogInformation("LogNullProperties: Type: {parentType}, No null properties found", objectType.FullName);
         }
     }
 
@@ -249,22 +249,22 @@ public static class ObjectExtension
     {
         if (obj == null)
         {
-            logger.LogWarning("LogNullPropertiesAsJson: Object is null.");
+            logger.LogWarning("LogNullPropertiesAsJson: Object is null");
             return;
         }
 
         System.Type objectType = obj.GetType();
 
-        Dictionary<string, object?> nullPropertiesTree = GetNullPropertiesTree(obj, objectType, []);
+        Dictionary<string, object?> nullPropertiesTree = GetNullPropertiesTree(obj, objectType, new HashSet<object>());
 
         if (nullPropertiesTree.Count > 0)
         {
-            string? jsonString = JsonUtil.Serialize(obj);
-            logger.LogInformation("LogNullPropertiesAsJson: Type ({parentType}), Null properties tree: {nullPropertiesString}", objectType.FullName, jsonString);
+            string? jsonString = JsonUtil.Serialize(nullPropertiesTree);
+            logger.LogInformation("LogNullPropertiesAsJson: Type ({objectType}), Null properties tree: {jsonString}", objectType.FullName, jsonString);
         }
         else
         {
-            logger.LogInformation("LogNullPropertiesAsJson: Type: {parentType}, No null properties found.", objectType.FullName);
+            logger.LogInformation("LogNullPropertiesAsJson: Type: {objectType}, No null properties found", objectType.FullName);
         }
     }
 
@@ -277,15 +277,23 @@ public static class ObjectExtension
             return nullPropertiesTree; // Prevent infinite recursion
         }
 
+        System.Type stringType = typeof(string);
+
         foreach (PropertyInfo property in objectType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
         {
+            // Skip properties that have index parameters
+            if (property.GetIndexParameters().Length > 0)
+            {
+                continue;
+            }
+
             object? value = property.GetValue(obj);
 
             if (value == null)
             {
                 nullPropertiesTree.Add(property.Name, null);
             }
-            else if (!property.PropertyType.IsValueType && property.PropertyType != typeof(string) && value is not IEnumerable)
+            else if (!property.PropertyType.IsValueType && property.PropertyType != stringType)
             {
                 Dictionary<string, object?> subNullPropertiesTree = GetNullPropertiesTree(value, property.PropertyType, visitedObjects);
                 if (subNullPropertiesTree.Count > 0)

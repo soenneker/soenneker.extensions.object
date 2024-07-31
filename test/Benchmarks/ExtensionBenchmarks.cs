@@ -1,4 +1,5 @@
 ﻿using BenchmarkDotNet.Attributes;
+using Soenneker.Extensions.Object.Tests.Dtos;
 using Soenneker.Utils.AutoBogus;
 
 namespace Soenneker.Extensions.Object.Tests.Benchmarks;

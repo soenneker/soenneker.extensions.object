@@ -1,8 +1,10 @@
 ﻿using FluentAssertions;
 using Soenneker.Extensions.Object.Tests.Benchmarks;
+using Soenneker.Extensions.Object.Tests.Dtos;
 using Soenneker.Tests.FixturedUnit;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.Sdk;
 
 namespace Soenneker.Extensions.Object.Tests;
 
@@ -41,5 +43,24 @@ public class ObjectExtensionTests : FixturedUnitTest
 
         string result = user.ToQueryString();
         result.Should().NotContain("True");
+    }
+
+    [Fact]
+    public void LogNullProperties_should_log()
+    {
+        UserDto obj = AutoFaker.Generate<UserDto>();
+        obj.Address.AdditionalInfo = null;
+
+        obj.LogNullProperties(Logger);
+    }
+
+    [Fact]
+    public void LogNullPropertiesRecursivelyAsJson_should_log()
+    {
+        UserDto obj = AutoFaker.Generate<UserDto>();
+        obj.Address.AdditionalInfo = null!;
+        obj.PhoneNumber = null!;
+
+        obj.LogNullPropertiesRecursivelyAsJson(Logger);
     }
 }

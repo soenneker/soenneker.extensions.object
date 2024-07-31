@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using Soenneker.Dtos.StreetAddress;
 
-namespace Soenneker.Extensions.Object.Tests.Benchmarks;
+namespace Soenneker.Extensions.Object.Tests.Dtos;
 
 public class UserDto
 {
@@ -18,11 +20,13 @@ public class UserDto
 
     public string PhoneNumber { get; set; } = default!;
 
-    public string Address { get; set; } = default!;
-
     public bool IsActive { get; set; }
 
     public decimal Salary { get; set; }
 
     public DateTime LastLogin { get; set; }
+
+    public List<PermissionDto>? Permissions { get; set; }
+
+    public StreetAddress Address { get; set; }
 }
