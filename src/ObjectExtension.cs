@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
@@ -9,7 +10,9 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using Soenneker.Constants.Auth;
+using Soenneker.Extensions.Enumerable.String;
 using Soenneker.Extensions.String;
 using Soenneker.Extensions.Type;
 using Soenneker.Utils.Json;
@@ -60,7 +63,14 @@ public static class ObjectExtension
         return httpContent;
     }
 
+    /// <summary>
+    /// Determines whether the specified object is of a numeric type.
+    /// </summary>
+    /// <param name="obj">The object to check.</param>
+    /// <returns><c>true</c> if the object is of a numeric type; otherwise, <c>false</c>.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when the <paramref name="obj"/> is null.</exception>
     [Pure]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsObjectNumeric(this object obj)
     {
         return obj.GetType().IsNumeric();
@@ -79,6 +89,12 @@ public static class ObjectExtension
             throw new ArgumentNullException(name);
     }
 
+    /// <summary>
+    /// Converts the properties of the specified object to a dictionary.
+    /// </summary>
+    /// <param name="source">The object whose properties are to be converted to a dictionary.</param>
+    /// <returns>A dictionary containing the names and values of the object's properties.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when the <paramref name="source"/> is null.</exception>
     [Pure]
     public static IDictionary<string, object?> ToDictionary(this object source)
     {
@@ -187,5 +203,121 @@ public static class ObjectExtension
         }
 
         return queryBuilder.ToString();
+    }
+
+    /// <summary>
+    /// Logs any properties of the given object that are null.
+    /// </summary>
+    /// <param name="obj">The object to inspect for null properties. Can be null.</param>
+    /// <param name="logger">The logger to use for logging null properties.</param>
+    public static void LogNullProperties(this object? obj, ILogger logger)
+    {
+        if (obj == null)
+        {
+            logger.LogWarning("LogNullProperties: Object is null.");
+            return;
+        }
+
+        System.Type objectType = obj.GetType();
+        var nullProperties = new List<string>();
+
+        foreach (PropertyInfo property in objectType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        {
+            if (property.GetValue(obj) == null)
+            {
+                nullProperties.Add($"{property.Name} (Type: {property.PropertyType.Name})");
+            }
+        }
+
+        if (nullProperties.Any())
+        {
+            string nullPropertiesString = nullProperties.ToCommaSeparatedString(true);
+            logger.LogInformation("LogNullProperties: Type ({parentType}), Null properties: {nullPropertiesString}", objectType.FullName, nullPropertiesString);
+        }
+        else
+        {
+            logger.LogInformation("LogNullProperties: Type: {parentType}, No null properties found.", objectType.FullName);
+        }
+    }
+
+    /// <summary>
+    /// Logs the properties of an object that are null, including nested objects, as a JSON string.
+    /// </summary>
+    /// <param name="obj">The object to inspect for null properties.</param>
+    /// <param name="logger">The logger to use for logging the null properties.</param>
+    public static void LogNullPropertiesRecursivelyAsJson(this object? obj, ILogger logger)
+    {
+        if (obj == null)
+        {
+            logger.LogWarning("LogNullPropertiesAsJson: Object is null.");
+            return;
+        }
+
+        System.Type objectType = obj.GetType();
+
+        Dictionary<string, object?> nullPropertiesTree = GetNullPropertiesTree(obj, objectType, []);
+
+        if (nullPropertiesTree.Count > 0)
+        {
+            string? jsonString = JsonUtil.Serialize(obj);
+            logger.LogInformation("LogNullPropertiesAsJson: Type ({parentType}), Null properties tree: {nullPropertiesString}", objectType.FullName, jsonString);
+        }
+        else
+        {
+            logger.LogInformation("LogNullPropertiesAsJson: Type: {parentType}, No null properties found.", objectType.FullName);
+        }
+    }
+
+    private static Dictionary<string, object?> GetNullPropertiesTree(object obj, System.Type objectType, HashSet<object> visitedObjects)
+    {
+        var nullPropertiesTree = new Dictionary<string, object?>();
+
+        if (!visitedObjects.Add(obj))
+        {
+            return nullPropertiesTree; // Prevent infinite recursion
+        }
+
+        foreach (PropertyInfo property in objectType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        {
+            object? value = property.GetValue(obj);
+
+            if (value == null)
+            {
+                nullPropertiesTree.Add(property.Name, null);
+            }
+            else if (!property.PropertyType.IsValueType && property.PropertyType != typeof(string) && value is not IEnumerable)
+            {
+                Dictionary<string, object?> subNullPropertiesTree = GetNullPropertiesTree(value, property.PropertyType, visitedObjects);
+                if (subNullPropertiesTree.Count > 0)
+                {
+                    nullPropertiesTree.Add(property.Name, subNullPropertiesTree);
+                }
+            }
+            else if (value is IEnumerable enumerable and not string)
+            {
+                var subNullPropertiesList = new List<object?>();
+                foreach (object? item in enumerable)
+                {
+                    if (item != null)
+                    {
+                        Dictionary<string, object?> itemNullPropertiesTree = GetNullPropertiesTree(item, item.GetType(), visitedObjects);
+                        if (itemNullPropertiesTree.Count > 0)
+                        {
+                            subNullPropertiesList.Add(itemNullPropertiesTree);
+                        }
+                    }
+                    else
+                    {
+                        subNullPropertiesList.Add(null);
+                    }
+                }
+                if (subNullPropertiesList.Count > 0)
+                {
+                    nullPropertiesTree.Add(property.Name, subNullPropertiesList);
+                }
+            }
+        }
+
+        return nullPropertiesTree;
     }
 }
