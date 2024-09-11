@@ -19,8 +19,8 @@
     <ItemGroup>
         <PackageReference Include="BenchmarkDotNet" Version="0.14.0" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
-        <PackageReference Include="Soenneker.Dtos.StreetAddress" Version="2.1.65" />
-        <PackageReference Include="Soenneker.Facts.Local" Version="2.1.297" />
+        <PackageReference Include="Soenneker.Dtos.StreetAddress" Version="2.1.73" />
+        <PackageReference Include="Soenneker.Facts.Local" Version="2.1.301" />
         <PackageReference Include="Soenneker.Facts.Manual" Version="2.1.114" />
         <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -30,8 +30,8 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
-        <PackageReference Include="Soenneker.Tests.FixturedUnit" Version="2.1.1018" />        
-        <PackageReference Include="Soenneker.Utils.Test" Version="2.1.242" />
+        <PackageReference Include="Soenneker.Tests.FixturedUnit" Version="2.1.1039" />        
+        <PackageReference Include="Soenneker.Utils.Test" Version="2.1.243" />
     </ItemGroup>
 
     <ItemGroup>
