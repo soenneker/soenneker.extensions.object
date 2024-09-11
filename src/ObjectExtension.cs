@@ -85,8 +85,7 @@ public static class ObjectExtension
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void ThrowIfNull([NotNull] this object? input, [CallerMemberName] string? name = null)
     {
-        if (input == null)
-            throw new ArgumentNullException(name);
+        ArgumentNullException.ThrowIfNull(input, name);
     }
 
     /// <summary>
