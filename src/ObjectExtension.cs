@@ -70,7 +70,6 @@ public static class ObjectExtension
     /// <returns><c>true</c> if the object is of a numeric type; otherwise, <c>false</c>.</returns>
     /// <exception cref="ArgumentNullException">Thrown when the <paramref name="obj"/> is null.</exception>
     [Pure]
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsObjectNumeric(this object obj)
     {
         return obj.GetType().IsNumeric();
@@ -82,7 +81,6 @@ public static class ObjectExtension
     /// <param name="input">The input object.</param>
     /// <param name="name">The name of the calling member.</param>
     /// <exception cref="ArgumentNullException">Thrown when the input object is null.</exception>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void ThrowIfNull([NotNull] this object? input, [CallerMemberName] string? name = null)
     {
         ArgumentNullException.ThrowIfNull(input, name);
