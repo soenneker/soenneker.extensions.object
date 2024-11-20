@@ -40,6 +40,6 @@
         <PackageReference Include="Soenneker.Constants.Auth" Version="3.0.384" />
         <PackageReference Include="Soenneker.Extensions.Enumerable.String" Version="3.0.624" />
         <PackageReference Include="Soenneker.Extensions.Type" Version="3.0.382" />
-        <PackageReference Include="Soenneker.Utils.Json" Version="3.0.1512" />
+        <PackageReference Include="Soenneker.Utils.Json" Version="3.0.1513" />
     </ItemGroup>
 </Project>
