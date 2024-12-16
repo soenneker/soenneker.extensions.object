@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using Soenneker.Extensions.Object.Tests.Dtos;
 using Soenneker.Tests.FixturedUnit;
+using Soenneker.Utils.Json;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -11,6 +12,25 @@ public class ObjectExtensionTests : FixturedUnitTest
 {
     public ObjectExtensionTests(Fixture fixture, ITestOutputHelper outputHelper) : base(fixture, outputHelper)
     {
+    }
+
+    [Fact]
+    public void ToHttpContent_should_not_throw()
+    {
+        var obj = AutoFaker.Generate<UserDto>();
+
+        var result = obj.ToHttpContent();
+        result.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async System.Threading.Tasks.Task ToHttpContent_should_deserialize()
+    {
+        var obj = AutoFaker.Generate<UserDto>();
+
+        var result = obj.ToHttpContent();
+        string content = await result.ReadAsStringAsync();
+        JsonUtil.Deserialize<UserDto>(content).Should().BeEquivalentTo(obj);
     }
 
     [Fact]

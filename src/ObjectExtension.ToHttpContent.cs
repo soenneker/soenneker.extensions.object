@@ -1,6 +1,9 @@
-﻿using System.Diagnostics.Contracts;
+﻿using System;
+using System.Diagnostics.Contracts;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Mime;
+using System.Reflection.PortableExecutable;
 using System.Text;
 using Soenneker.Constants.Auth;
 using Soenneker.Utils.Json;
@@ -10,6 +13,8 @@ namespace Soenneker.Extensions.Object;
 
 public static partial class ObjectExtension
 {
+    private static readonly byte[] _emptyByteArray = [];
+
     /// <summary>
     /// Converts an object to an <see cref="HttpContent"/> with JSON content using <see cref="JsonUtil.WebOptions"/>.
     /// </summary>
@@ -24,10 +29,26 @@ public static partial class ObjectExtension
     [Pure]
     public static HttpContent ToHttpContent(this object? obj)
     {
-        string? jsonContent = obj != null ? JsonUtil.Serialize(obj) : "";
+        HttpContent httpContent;
 
-        var result = new StringContent(jsonContent!, Encoding.UTF8, MediaTypeNames.Application.Json);
-        return result;
+        if (obj is null)
+        {
+            httpContent = new ByteArrayContent(_emptyByteArray)
+            {
+                Headers = { ContentType = new MediaTypeHeaderValue(MediaTypeNames.Application.Json) }
+            };
+        }
+        else
+        {
+            byte[] utf8Bytes = JsonUtil.SerializeToUtf8Bytes(obj);
+
+            httpContent = new ByteArrayContent(utf8Bytes)
+            {
+                Headers = { ContentType = new MediaTypeHeaderValue(MediaTypeNames.Application.Json) }
+            };
+        }
+
+        return httpContent;
     }
 
     /// <summary>
