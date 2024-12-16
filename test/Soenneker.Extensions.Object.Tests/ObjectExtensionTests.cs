@@ -1,10 +1,8 @@
 ﻿using FluentAssertions;
-using Soenneker.Extensions.Object.Tests.Benchmarks;
 using Soenneker.Extensions.Object.Tests.Dtos;
 using Soenneker.Tests.FixturedUnit;
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.Sdk;
 
 namespace Soenneker.Extensions.Object.Tests;
 

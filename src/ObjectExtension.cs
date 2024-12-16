@@ -4,65 +4,23 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Net.Http;
-using System.Net.Mime;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
-using Soenneker.Constants.Auth;
 using Soenneker.Extensions.Enumerable.String;
 using Soenneker.Extensions.String;
 using Soenneker.Extensions.Type;
 using Soenneker.Utils.Json;
-using Soenneker.Utils.Json.Abstract;
 
 namespace Soenneker.Extensions.Object;
 
 /// <summary>
 /// A collection of helpful Object extension methods
 /// </summary>
-public static class ObjectExtension
+public static partial class ObjectExtension
 {
-    /// <returns>An application/json HttpContent, with JsonUtil.WebOptions. <para/>
-    /// If the object is null, returns a new HttpContent with empty content.
-    /// </returns>
-    /// <remarks>Will not log result, see <see cref="IJsonUtil"/> for that</remarks>
-    [Pure]
-    public static HttpContent ToHttpContent(this object? obj)
-    {
-        string? jsonContent = obj != null ? JsonUtil.Serialize(obj) : "";
-
-        var result = new StringContent(jsonContent!, Encoding.UTF8, MediaTypeNames.Application.Json);
-        return result;
-    }
-
-    /// <returns>An application/json HttpContent, with JsonUtil.WebOptions. <para/>
-    /// If the object is null, returns a new HttpContent with empty content. <para/>
-    /// Also returns the serialized string that was used to construct the HttpContent.
-    /// </returns>
-    [Pure]
-    public static (HttpContent httpContent, string str) ToHttpContentAndString(this object? obj)
-    {
-        string? jsonContent = obj != null ? JsonUtil.Serialize(obj) : "";
-
-        var content = new StringContent(jsonContent!, Encoding.UTF8, MediaTypeNames.Application.Json);
-        return (content, jsonContent!);
-    }
-
-    /// <summary>
-    /// <see cref="ToHttpContent"/> and then adds the 'x-api-key' header to the request
-    /// </summary>
-    [Pure]
-    public static HttpContent ToHttpContentWithKey(this object? obj, string apiKey)
-    {
-        var httpContent = obj.ToHttpContent();
-        httpContent.Headers.TryAddWithoutValidation(AuthConstants.XApiKey, apiKey);
-
-        return httpContent;
-    }
-
     /// <summary>
     /// Determines whether the specified object is of a numeric type.
     /// </summary>
@@ -226,7 +184,7 @@ public static class ObjectExtension
             }
         }
 
-        if (nullProperties.Any())
+        if (nullProperties.Count > 0)
         {
             string nullPropertiesString = nullProperties.ToCommaSeparatedString(true);
             logger.LogInformation("LogNullProperties: Type ({parentType}), Null properties: {nullPropertiesString}", objectType.FullName, nullPropertiesString);
