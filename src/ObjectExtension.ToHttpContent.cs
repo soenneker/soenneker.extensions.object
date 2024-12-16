@@ -1,9 +1,7 @@
-﻿using System;
-using System.Diagnostics.Contracts;
+﻿using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Mime;
-using System.Reflection.PortableExecutable;
 using System.Text;
 using Soenneker.Constants.Auth;
 using Soenneker.Utils.Json;

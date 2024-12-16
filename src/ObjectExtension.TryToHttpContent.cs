@@ -25,13 +25,13 @@ public static partial class ObjectExtension
         {
             return ToHttpContent(obj);
         }
-        catch (JsonSerializationException jsonException)
+        catch (JsonSerializationException ex)
         {
-            logger?.LogError(jsonException, "Failed to serialize object to HttpContent");
+            logger?.LogError(ex, "Failed to serialize object to HttpContent for type ({type})", obj?.GetType().Name);
         }
         catch (Exception ex)
         {
-            logger?.LogError(ex, "An error occurred while converting object to HttpContent: {Message}", ex.Message);
+            logger?.LogError(ex, "An error occurred while converting object to HttpContent for type ({type}): {Message}", obj?.GetType().Name, ex.Message);
         }
 
         return null;
@@ -56,11 +56,11 @@ public static partial class ObjectExtension
         }
         catch (JsonSerializationException ex)
         {
-            logger?.LogError(ex, "Failed to serialize object to JSON for HttpContent.");
+            logger?.LogError(ex, "Failed to serialize object to HttpContent for type ({type})", obj?.GetType().Name);
         }
         catch (Exception ex)
         {
-            logger?.LogError(ex, "An error occurred while constructing HttpContent: {Message}", ex.Message);
+            logger?.LogError(ex, "An error occurred while converting object to HttpContent for type ({type}): {Message}", obj?.GetType().Name, ex.Message);
         }
 
         return (null, null);
@@ -85,11 +85,11 @@ public static partial class ObjectExtension
         }
         catch (JsonSerializationException ex)
         {
-            logger?.LogError(ex, "Failed to serialize object to JSON for HttpContent.");
+            logger?.LogError(ex, "Failed to serialize object to HttpContent for type ({type})", obj?.GetType().Name);
         }
         catch (Exception ex)
         {
-            logger?.LogError(ex, "An error occurred while constructing HttpContent with 'x-api-key': {Message}", ex.Message);
+            logger?.LogError(ex, "An error occurred while converting object to HttpContent for type ({type}): {Message}", obj?.GetType().Name, ex.Message);
         }
 
         return null;
