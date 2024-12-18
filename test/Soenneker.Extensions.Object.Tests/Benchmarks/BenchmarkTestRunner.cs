@@ -1,8 +1,8 @@
-﻿using BenchmarkDotNet.Reports;
+using BenchmarkDotNet.Reports;
 using BenchmarkDotNet.Running;
 using Soenneker.Facts.Local;
 using Xunit;
-using Xunit.Abstractions;
+
 
 namespace Soenneker.Extensions.Object.Tests.Benchmarks;
 

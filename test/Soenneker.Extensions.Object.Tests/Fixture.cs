@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Soenneker.Fixtures.Unit;
@@ -9,7 +9,7 @@ namespace Soenneker.Extensions.Object.Tests;
 
 public class Fixture : UnitFixture
 {
-    public override async System.Threading.Tasks.Task InitializeAsync()
+    public override async System.Threading.Tasks.ValueTask InitializeAsync()
     {
         SetupIoC(Services);
 
