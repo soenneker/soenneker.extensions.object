@@ -74,7 +74,7 @@ public static partial class ObjectExtension
     [Pure]
     public static string ToQueryStringViaReflection(this object? obj, bool loweredPropertyNames = true)
     {
-        if (obj == null)
+        if (obj is null)
             return "";
 
         System.Type type = obj.GetType();
@@ -89,7 +89,8 @@ public static partial class ObjectExtension
         foreach (PropertyInfo property in properties)
         {
             object? value = property.GetValue(obj);
-            if (value == null) continue;
+            if (value is null)
+				continue;
 
             if (firstParameterAdded)
             {
@@ -124,17 +125,17 @@ public static partial class ObjectExtension
     [Pure]
     public static string ToQueryString(this object? obj)
     {
-        if (obj == null)
+        if (obj is null)
             return "";
 
         string? serializedObj = JsonUtil.Serialize(obj);
 
-        if (string.IsNullOrEmpty(serializedObj))
+        if (serializedObj.IsNullOrEmpty())
             return "";
 
         var dictionary = JsonUtil.Deserialize<Dictionary<string, JsonElement>>(serializedObj!);
 
-        if (dictionary == null || dictionary.Count == 0)
+        if (dictionary is null || dictionary.Count == 0)
             return "";
 
         var queryBuilder = new StringBuilder(dictionary.Count * 10);
@@ -167,7 +168,7 @@ public static partial class ObjectExtension
     /// <param name="logger">The logger to use for logging null properties.</param>
     public static void LogNullProperties(this object? obj, ILogger logger)
     {
-        if (obj == null)
+        if (obj is null)
         {
             logger.LogWarning("LogNullProperties: Object is null");
             return;
@@ -178,7 +179,7 @@ public static partial class ObjectExtension
 
         foreach (PropertyInfo property in objectType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
         {
-            if (property.GetValue(obj) == null)
+            if (property.GetValue(obj) is null)
             {
                 nullProperties.Add($"{property.Name} (Type: {property.PropertyType.Name})");
             }
@@ -202,7 +203,7 @@ public static partial class ObjectExtension
     /// <param name="logger">The logger to use for logging the null properties.</param>
     public static void LogNullPropertiesRecursivelyAsJson(this object? obj, ILogger logger)
     {
-        if (obj == null)
+        if (obj is null)
         {
             logger.LogWarning("LogNullPropertiesAsJson: Object is null");
             return;
@@ -244,7 +245,7 @@ public static partial class ObjectExtension
 
             object? value = property.GetValue(obj);
 
-            if (value == null)
+            if (value is null)
             {
                 nullPropertiesTree.Add(property.Name, null);
             }
