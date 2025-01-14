@@ -262,7 +262,7 @@ public static partial class ObjectExtension
                 var subNullPropertiesList = new List<object?>();
                 foreach (object? item in enumerable)
                 {
-                    if (item != null)
+                    if (item is not null)
                     {
                         Dictionary<string, object?> itemNullPropertiesTree = GetNullPropertiesTree(item, item.GetType(), visitedObjects);
                         if (itemNullPropertiesTree.Count > 0)
