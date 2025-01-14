@@ -89,8 +89,9 @@ public static partial class ObjectExtension
         foreach (PropertyInfo property in properties)
         {
             object? value = property.GetValue(obj);
+
             if (value is null)
-				continue;
+                continue;
 
             if (firstParameterAdded)
             {
@@ -153,9 +154,7 @@ public static partial class ObjectExtension
             if (queryBuilder.Length > 1)
                 queryBuilder.Append('&');
 
-            queryBuilder.Append(qs.Key);
-            queryBuilder.Append('=');
-            queryBuilder.Append(value);
+            queryBuilder.Append(qs.Key).Append('=').Append(value);
         }
 
         return queryBuilder.ToString();
@@ -265,6 +264,7 @@ public static partial class ObjectExtension
                     if (item is not null)
                     {
                         Dictionary<string, object?> itemNullPropertiesTree = GetNullPropertiesTree(item, item.GetType(), visitedObjects);
+
                         if (itemNullPropertiesTree.Count > 0)
                         {
                             subNullPropertiesList.Add(itemNullPropertiesTree);
@@ -275,6 +275,7 @@ public static partial class ObjectExtension
                         subNullPropertiesList.Add(null);
                     }
                 }
+
                 if (subNullPropertiesList.Count > 0)
                 {
                     nullPropertiesTree.Add(property.Name, subNullPropertiesList);
