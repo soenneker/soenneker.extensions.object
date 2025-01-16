@@ -22,7 +22,7 @@ public class BenchmarkTest : FixturedUnitTest
     {
         var fileUtil = Resolve<IFileUtil>();
 
-        string log = await fileUtil.ReadFile(summary.LogFilePath);
+        string log = await fileUtil.Read(summary.LogFilePath);
 
         Logger.LogInformation("{log}", log);
     }

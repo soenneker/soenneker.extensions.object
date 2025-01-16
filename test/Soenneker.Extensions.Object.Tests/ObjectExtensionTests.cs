@@ -29,7 +29,7 @@ public class ObjectExtensionTests : FixturedUnitTest
         var obj = AutoFaker.Generate<UserDto>();
 
         var result = obj.ToHttpContent();
-        string content = await result.ReadAsStringAsync();
+        string content = await result.ReadAsStringAsync(CancellationToken);
         JsonUtil.Deserialize<UserDto>(content).Should().BeEquivalentTo(obj);
     }
 
