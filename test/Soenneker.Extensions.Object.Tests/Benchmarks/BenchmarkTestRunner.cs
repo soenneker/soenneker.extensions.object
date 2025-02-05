@@ -1,6 +1,8 @@
 using BenchmarkDotNet.Reports;
 using BenchmarkDotNet.Running;
+using Soenneker.Benchmarking.Extensions.Summary;
 using Soenneker.Facts.Local;
+using Soenneker.Tests.Benchmark;
 using Xunit;
 
 
@@ -9,7 +11,7 @@ namespace Soenneker.Extensions.Object.Tests.Benchmarks;
 [Collection("Collection")]
 public class BenchmarkTestRunner : BenchmarkTest
 {
-    public BenchmarkTestRunner(Fixture fixture, ITestOutputHelper outputHelper) : base(fixture, outputHelper)
+    public BenchmarkTestRunner(Fixture fixture, ITestOutputHelper outputHelper) : base(outputHelper)
     {
     }
 
@@ -19,6 +21,6 @@ public class BenchmarkTestRunner : BenchmarkTest
     {
         Summary summary = BenchmarkRunner.Run<ExtensionBenchmarks>(DefaultConf);
 
-        await OutputSummaryToLog(summary);
+        await summary.OutputSummaryToLog(OutputHelper, CancellationToken);
     }
 }
