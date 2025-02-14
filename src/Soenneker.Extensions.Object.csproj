@@ -38,7 +38,7 @@
         <None Include="..\icon.png" Pack="true" PackagePath="\" />
         
         <PackageReference Include="Soenneker.Constants.Auth" Version="3.0.540" />
-        <PackageReference Include="Soenneker.Extensions.Enumerable.String" Version="3.0.1009" />
+        <PackageReference Include="Soenneker.Extensions.Enumerable.String" Version="3.0.1014" />
         <PackageReference Include="Soenneker.Extensions.Type" Version="3.0.546" />
         <PackageReference Include="Soenneker.Utils.Json" Version="3.0.2092" />
     </ItemGroup>
