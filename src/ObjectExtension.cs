@@ -285,4 +285,76 @@ public static partial class ObjectExtension
 
         return nullPropertiesTree;
     }
+
+    /// <summary>
+    /// Converts an object into a human-readable string representation, including its public properties.
+    /// </summary>
+    /// <param name="obj">The object to be converted into a readable string.</param>
+    /// <param name="indentLevel">The indentation level used for formatting nested objects and collections. Default is 0.</param>
+    /// <returns>A formatted string representation of the object's properties and their values.</returns>
+    /// <remarks>
+    /// - If the object is <c>null</c>, the method returns the string <c>"null"</c>.
+    /// - If the object contains enumerable properties (excluding strings), each element is indented and listed.
+    /// - If the object contains nested class instances, they are recursively processed with increased indentation.
+    /// - Primitive and string properties are displayed directly alongside their values.
+    /// </remarks>
+    /// <example>
+    /// Example usage:
+    /// <code>
+    /// var person = new Person { Name = "Alice", Age = 30 };
+    /// string readableString = person.ToReadableString();
+    /// Console.WriteLine(readableString);
+    /// </code>
+    /// Output:
+    /// <code>
+    /// Name: Alice
+    /// Age: 30
+    /// </code>
+    /// </example>
+    [Pure]
+    public static string ToReadableString(this object obj, int indentLevel = 0)
+    {
+        if (obj == null)
+            return "null";
+
+        System.Type type = obj.GetType();
+        PropertyInfo[] properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+        var stringBuilder = new StringBuilder();
+
+        var indent = new string(' ', indentLevel * 2);
+
+        foreach (PropertyInfo property in properties)
+        {
+            if (property.GetIndexParameters().Length == 0)
+            {
+                object? value = property.GetValue(obj, null);
+                var propertyName = $"{indent}{property.Name}:";
+
+                if (value == null)
+                {
+                    stringBuilder.AppendLine($"{propertyName} null");
+                }
+                else if (value is IEnumerable enumerable and not string)
+                {
+                    stringBuilder.AppendLine(propertyName);
+
+                    foreach (object? item in enumerable)
+                    {
+                        stringBuilder.Append(item.ToReadableString(indentLevel + 1));
+                    }
+                }
+                else if (value.GetType().IsClass && !value.GetType().IsPrimitive && value is not string)
+                {
+                    stringBuilder.AppendLine(propertyName);
+                    stringBuilder.Append(value.ToReadableString(indentLevel + 1));
+                }
+                else
+                {
+                    stringBuilder.AppendLine($"{propertyName} {value}");
+                }
+            }
+        }
+
+        return stringBuilder.ToString();
+    }
 }
