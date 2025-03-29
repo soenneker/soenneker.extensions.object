@@ -51,7 +51,7 @@ public static partial class ObjectExtension
     /// <returns>A dictionary containing the names and values of the object's properties.</returns>
     /// <exception cref="ArgumentNullException">Thrown when the <paramref name="source"/> is null.</exception>
     [Pure]
-    public static IDictionary<string, object?> ToDictionary(this object source)
+    public static Dictionary<string, object?> ToDictionary(this object source)
     {
         const BindingFlags bindingAttr = BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance;
 
