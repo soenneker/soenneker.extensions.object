@@ -19,7 +19,7 @@
     <ItemGroup>
         <PackageReference Include="BenchmarkDotNet" Version="0.14.0" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
-        <PackageReference Include="Soenneker.Dtos.StreetAddress" Version="3.0.419" />
+        <PackageReference Include="Soenneker.Dtos.StreetAddress" Version="3.0.420" />
         <PackageReference Include="Soenneker.Facts.Local" Version="3.0.453" />
         <PackageReference Include="Soenneker.Facts.Manual" Version="3.0.140" />
         <PackageReference Include="Soenneker.Tests.Benchmark" Version="3.0.17" />
