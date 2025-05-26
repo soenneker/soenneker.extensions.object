@@ -1,4 +1,9 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using Soenneker.Extensions.Enumerable.String;
+using Soenneker.Extensions.String;
+using Soenneker.Extensions.Type;
+using Soenneker.Utils.Json;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -8,11 +13,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
-using Microsoft.Extensions.Logging;
-using Soenneker.Extensions.Enumerable.String;
-using Soenneker.Extensions.String;
-using Soenneker.Extensions.Type;
-using Soenneker.Utils.Json;
+using System.Text.Json.Serialization;
 
 namespace Soenneker.Extensions.Object;
 
@@ -45,24 +46,39 @@ public static partial class ObjectExtension
     }
 
     /// <summary>
-    /// Converts the properties of the specified object to a dictionary.
+    /// Converts an object's public instance properties into a dictionary.
+    /// Uses <see cref="JsonPropertyNameAttribute"/> if present for the key.
+    /// Only declared properties (not inherited) are included.
+    /// Optimized for low allocations and high performance.
     /// </summary>
-    /// <param name="source">The object whose properties are to be converted to a dictionary.</param>
-    /// <returns>A dictionary containing the names and values of the object's properties.</returns>
-    /// <exception cref="ArgumentNullException">Thrown when the <paramref name="source"/> is null.</exception>
+    /// <param name="source">The object to convert.</param>
+    /// <returns>A dictionary of property names (or JSON names) to values.</returns>
     [Pure]
-    public static Dictionary<string, object?> ToDictionary(this object source)
+    public static Dictionary<string, object?> ToDictionary(this object? source)
     {
-        const BindingFlags bindingAttr = BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance;
+        if (source is null)
+            return new Dictionary<string, object?>();
 
+        const BindingFlags bindingAttr = BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly;
         System.Type type = source.GetType();
+
         PropertyInfo[] properties = type.GetProperties(bindingAttr);
 
-        Dictionary<string, object?> dictionary = properties.ToDictionary
-        (
-            propInfo => propInfo.Name,
-            propInfo => propInfo.GetValue(source, null)
-        );
+        var dictionary = new Dictionary<string, object?>(properties.Length);
+
+        for (int i = 0; i < properties.Length; i++)
+        {
+            PropertyInfo prop = properties[i];
+
+            if (!prop.CanRead)
+                continue;
+
+            string name = prop.GetCustomAttribute<JsonPropertyNameAttribute>(false)?.Name ?? prop.Name;
+
+            object? value = prop.GetValue(source);
+
+            dictionary[name] = value;
+        }
 
         return dictionary;
     }
@@ -108,9 +124,7 @@ public static partial class ObjectExtension
             if (loweredPropertyNames)
                 propertyName = propertyName.ToLowerInvariantFast();
 
-            queryString.Append(propertyName)
-                .Append('=')
-                .Append(value.ToString().ToEscaped());
+            queryString.Append(propertyName).Append('=').Append(value.ToString().ToEscaped());
         }
 
         return queryString.ToString();
