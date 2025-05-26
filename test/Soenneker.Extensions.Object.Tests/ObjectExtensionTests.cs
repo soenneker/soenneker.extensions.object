@@ -1,4 +1,4 @@
-using FluentAssertions;
+using AwesomeAssertions;
 using Soenneker.Extensions.Object.Tests.Dtos;
 using Soenneker.Tests.FixturedUnit;
 using Soenneker.Utils.Json;
