@@ -2,6 +2,7 @@ using BenchmarkDotNet.Reports;
 using BenchmarkDotNet.Running;
 using Soenneker.Benchmarking.Extensions.Summary;
 using Soenneker.Facts.Local;
+using Soenneker.Facts.Manual;
 using Soenneker.Tests.Benchmark;
 using Xunit;
 
@@ -15,8 +16,8 @@ public class BenchmarkTestRunner : BenchmarkTest
     {
     }
 
-    //[ManualFact]
-    [LocalFact]
+    [ManualFact]
+    //[LocalFact]
     public async System.Threading.Tasks.Task ExtensionBenchmarks()
     {
         Summary summary = BenchmarkRunner.Run<ExtensionBenchmarks>(DefaultConf);
