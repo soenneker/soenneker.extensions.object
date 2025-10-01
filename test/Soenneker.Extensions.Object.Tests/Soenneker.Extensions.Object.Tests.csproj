@@ -19,10 +19,10 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
         <PackageReference Include="Soenneker.Dtos.StreetAddress" Version="3.0.470" />
-        <PackageReference Include="Soenneker.Facts.Local" Version="3.0.518" />
-        <PackageReference Include="Soenneker.Facts.Manual" Version="3.0.156" />
-        <PackageReference Include="Soenneker.Tests.Benchmark" Version="3.0.45" />
-        <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4">
+        <PackageReference Include="Soenneker.Facts.Local" Version="3.0.520" />
+        <PackageReference Include="Soenneker.Facts.Manual" Version="3.0.157" />
+        <PackageReference Include="Soenneker.Tests.Benchmark" Version="3.0.47" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
@@ -30,9 +30,9 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
-        <PackageReference Include="Soenneker.Tests.FixturedUnit" Version="3.0.1978" />        
+        <PackageReference Include="Soenneker.Tests.FixturedUnit" Version="3.0.1983" />        
         <PackageReference Include="Soenneker.Utils.Test" Version="3.0.293" />
-    <PackageReference Include="xUnit.v3" Version="3.0.1" /></ItemGroup>
+    <PackageReference Include="xUnit.v3" Version="3.1.0" /></ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\Soenneker.Extensions.Object.csproj" />

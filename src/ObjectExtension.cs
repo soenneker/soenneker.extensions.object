@@ -5,6 +5,7 @@ using Soenneker.Extensions.Type;
 using Soenneker.Utils.Json;
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
@@ -14,6 +15,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Soenneker.Utils.PooledStringBuilders;
 
 namespace Soenneker.Extensions.Object;
 
@@ -22,6 +24,9 @@ namespace Soenneker.Extensions.Object;
 /// </summary>
 public static partial class ObjectExtension
 {
+    private static readonly ConcurrentDictionary<System.Type, (PropertyInfo[] Props, string[] Names)> _declaredPropCache = new();
+    private static readonly ConcurrentDictionary<System.Type, PropertyInfo[]> _publicPropCache = new();
+
     /// <summary>
     /// Determines whether the specified object is of a numeric type.
     /// </summary>
@@ -31,7 +36,8 @@ public static partial class ObjectExtension
     [Pure]
     public static bool IsObjectNumeric(this object obj)
     {
-        return obj.GetType().IsNumeric();
+        return obj.GetType()
+            .IsNumeric();
     }
 
     /// <summary>
@@ -59,28 +65,34 @@ public static partial class ObjectExtension
         if (source is null)
             return new Dictionary<string, object?>();
 
-        const BindingFlags bindingAttr = BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly;
         System.Type type = source.GetType();
 
-        PropertyInfo[] properties = type.GetProperties(bindingAttr);
-
-        var dictionary = new Dictionary<string, object?>(properties.Length);
-
-        for (int i = 0; i < properties.Length; i++)
+        // Cache DECLARED ONLY + json names
+        (PropertyInfo[] props, string[] names) = _declaredPropCache.GetOrAdd(type, t =>
         {
-            PropertyInfo prop = properties[i];
+            const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly;
+            PropertyInfo[] raw = t.GetProperties(flags);
+            // Filter to readable, non-indexer once
+            PropertyInfo[] filtered = raw.Where(p => p.CanRead && p.GetIndexParameters()
+                    .Length == 0)
+                .ToArray();
+            var nameArr = new string[filtered.Length];
+            for (int i = 0; i < filtered.Length; i++)
+                nameArr[i] = filtered[i]
+                    .GetCustomAttribute<JsonPropertyNameAttribute>(false)
+                    ?.Name ?? filtered[i].Name;
+            return (filtered, nameArr);
+        });
 
-            if (!prop.CanRead)
-                continue;
+        var dict = new Dictionary<string, object?>(props.Length);
 
-            string name = prop.GetCustomAttribute<JsonPropertyNameAttribute>(false)?.Name ?? prop.Name;
-
-            object? value = prop.GetValue(source);
-
-            dictionary[name] = value;
+        for (int i = 0; i < props.Length; i++)
+        {
+            dict[names[i]] = props[i]
+                .GetValue(source);
         }
 
-        return dictionary;
+        return dict;
     }
 
     /// <summary>
@@ -91,43 +103,43 @@ public static partial class ObjectExtension
     public static string ToQueryStringViaReflection(this object? obj, bool loweredPropertyNames = true)
     {
         if (obj is null)
-            return "";
+            return string.Empty;
 
-        System.Type type = obj.GetType();
-        PropertyInfo[] properties = type.GetProperties().Where(prop => prop.CanRead).ToArray();
-
-        if (properties.Length == 0)
-            return "";
-
-        var queryString = new StringBuilder(properties.Length * 10);
-
-        var firstParameterAdded = false;
-        foreach (PropertyInfo property in properties)
+        var type = obj.GetType();
+        var props = _publicPropCache.GetOrAdd(type, t =>
         {
-            object? value = property.GetValue(obj);
+            const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public;
+            return t.GetProperties(flags)
+                .Where(p => p.CanRead && p.GetIndexParameters()
+                    .Length == 0)
+                .ToArray();
+        });
 
-            if (value is null)
+        using var sb = new PooledStringBuilder();
+
+        bool any = false;
+
+        for (int i = 0; i < props.Length; i++)
+        {
+            var p = props[i];
+            var val = p.GetValue(obj);
+            if (val is null)
                 continue;
 
-            if (firstParameterAdded)
-            {
-                queryString.Append('&');
-            }
-            else
-            {
-                firstParameterAdded = true;
-                queryString.Append('?');
-            }
+            sb.Append(any ? '&' : '?');
+            any = true;
 
-            string propertyName = property.Name.ToEscaped();
-
+            var name = p.Name.ToEscaped();
             if (loweredPropertyNames)
-                propertyName = propertyName.ToLowerInvariantFast();
+                name = name.ToLowerInvariantFast(); // already your fast path
 
-            queryString.Append(propertyName).Append('=').Append(value.ToString().ToEscaped());
+            sb.Append(name);
+            sb.Append('=');
+            sb.Append(val.ToString()
+                .ToEscaped());
         }
 
-        return queryString.ToString();
+        return any ? sb.ToString() : string.Empty;
     }
 
     /// <summary>
@@ -162,13 +174,16 @@ public static partial class ObjectExtension
             {
                 JsonValueKind.True => "true",
                 JsonValueKind.False => "false",
-                _ => qs.Value.ToString().ToEscaped()
+                _ => qs.Value.ToString()
+                    .ToEscaped()
             };
 
             if (queryBuilder.Length > 1)
                 queryBuilder.Append('&');
 
-            queryBuilder.Append(qs.Key).Append('=').Append(value);
+            queryBuilder.Append(qs.Key)
+                .Append('=')
+                .Append(value);
         }
 
         return queryBuilder.ToString();
@@ -251,7 +266,8 @@ public static partial class ObjectExtension
         foreach (PropertyInfo property in objectType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
         {
             // Skip properties that have index parameters
-            if (property.GetIndexParameters().Length > 0)
+            if (property.GetIndexParameters()
+                    .Length > 0)
             {
                 continue;
             }
@@ -339,7 +355,8 @@ public static partial class ObjectExtension
 
         foreach (PropertyInfo property in properties)
         {
-            if (property.GetIndexParameters().Length == 0)
+            if (property.GetIndexParameters()
+                    .Length == 0)
             {
                 object? value = property.GetValue(obj, null);
                 var propertyName = $"{indent}{property.Name}:";
@@ -357,7 +374,9 @@ public static partial class ObjectExtension
                         stringBuilder.Append(item.ToReadableString(indentLevel + 1));
                     }
                 }
-                else if (value.GetType().IsClass && !value.GetType().IsPrimitive && value is not string)
+                else if (value.GetType()
+                             .IsClass && !value.GetType()
+                             .IsPrimitive && value is not string)
                 {
                     stringBuilder.AppendLine(propertyName);
                     stringBuilder.Append(value.ToReadableString(indentLevel + 1));

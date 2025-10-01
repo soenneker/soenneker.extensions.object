@@ -6,9 +6,9 @@ namespace Soenneker.Extensions.Object.Tests.Benchmarks;
 
 public class ExtensionBenchmarks
 {
-    private AutoFaker _autoFaker = default!;
+    private AutoFaker _autoFaker = null!;
 
-    private UserDto _userDto = default!;
+    private UserDto _userDto = null!;
 
     [GlobalSetup]
     public void SetupData()
