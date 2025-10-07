@@ -4,18 +4,17 @@
         <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
-        <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
-        <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+        <UseMicrosoftTestingPlatform>false</UseMicrosoftTestingPlatform>
     </PropertyGroup>
 
     <ItemGroup>
-      <None Remove="appsettings.json" />
+        <None Remove="appsettings.json" />
     </ItemGroup>
 
     <ItemGroup>
-      <Content Include="appsettings.json">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
+        <Content Include="appsettings.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
     </ItemGroup>
 
     <ItemGroup>
@@ -32,9 +31,10 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
-        <PackageReference Include="Soenneker.Tests.FixturedUnit" Version="3.0.1985" />        
+        <PackageReference Include="Soenneker.Tests.FixturedUnit" Version="3.0.1985" />
         <PackageReference Include="Soenneker.Utils.Test" Version="3.0.293" />
-    <PackageReference Include="xUnit.v3" Version="3.1.0" /></ItemGroup>
+        <PackageReference Include="xUnit.v3" Version="3.1.0" />
+    </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\Soenneker.Extensions.Object.csproj" />
