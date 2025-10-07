@@ -252,68 +252,94 @@ public static partial class ObjectExtension
         }
     }
 
-    private static Dictionary<string, object?> GetNullPropertiesTree(object obj, System.Type objectType, HashSet<object> visitedObjects)
+    private static Dictionary<string, object?> GetNullPropertiesTree(object obj, System.Type objectType, HashSet<object> visited)
     {
-        var nullPropertiesTree = new Dictionary<string, object?>();
+        var tree = new Dictionary<string, object?>();
 
-        if (!visitedObjects.Add(obj))
+        if (!visited.Add(obj))
+            return tree; // prevent cycles
+
+        // Don’t descend into most framework types (except we still handle IEnumerable separately below)
+        // This avoids spelunking into things like List<T> internals via properties.
+        static bool IsFrameworkLeaf(System.Type t)
+            => t.Namespace is string ns &&
+               (ns.StartsWith("System", StringComparison.Ordinal) ||
+                ns.StartsWith("Microsoft", StringComparison.Ordinal));
+
+        foreach (PropertyInfo prop in objectType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
         {
-            return nullPropertiesTree; // Prevent infinite recursion
-        }
+            // Skip indexers and non-readable props
+            if (prop.GetIndexParameters().Length > 0 || !prop.CanRead)
+                continue;
 
-        System.Type stringType = typeof(string);
-
-        foreach (PropertyInfo property in objectType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
-        {
-            // Skip properties that have index parameters
-            if (property.GetIndexParameters()
-                    .Length > 0)
+            object? value;
+            try
             {
+                value = prop.GetValue(obj);
+            }
+            catch
+            {
+                // Some framework props can throw; skip them
                 continue;
             }
 
-            object? value = property.GetValue(obj);
-
             if (value is null)
             {
-                nullPropertiesTree.Add(property.Name, null);
+                tree[prop.Name] = null;
+                continue;
             }
-            else if (!property.PropertyType.IsValueType && property.PropertyType != stringType)
-            {
-                Dictionary<string, object?> subNullPropertiesTree = GetNullPropertiesTree(value, property.PropertyType, visitedObjects);
-                if (subNullPropertiesTree.Count > 0)
-                {
-                    nullPropertiesTree.Add(property.Name, subNullPropertiesTree);
-                }
-            }
-            else if (value is IEnumerable enumerable and not string)
-            {
-                var subNullPropertiesList = new List<object?>();
-                foreach (object? item in enumerable)
-                {
-                    if (item is not null)
-                    {
-                        Dictionary<string, object?> itemNullPropertiesTree = GetNullPropertiesTree(item, item.GetType(), visitedObjects);
 
-                        if (itemNullPropertiesTree.Count > 0)
-                        {
-                            subNullPropertiesList.Add(itemNullPropertiesTree);
-                        }
-                    }
-                    else
+            // 1) Collections FIRST (excluding string)
+            if (value is IEnumerable enumerable && value is not string)
+            {
+                var list = new List<object?>();
+                foreach (var item in enumerable)
+                {
+                    if (item is null)
                     {
-                        subNullPropertiesList.Add(null);
+                        list.Add(null);
+                        continue;
                     }
+
+                    var itemType = item.GetType();
+                    if (IsFrameworkLeaf(itemType))
+                    {
+                        // We don't reflect into framework types here; only record nulls of nested objects,
+                        // so ignore non-null leaf items.
+                        continue;
+                    }
+
+                    var itemTree = GetNullPropertiesTree(item, itemType, visited);
+                    if (itemTree.Count > 0)
+                        list.Add(itemTree);
                 }
 
-                if (subNullPropertiesList.Count > 0)
-                {
-                    nullPropertiesTree.Add(property.Name, subNullPropertiesList);
-                }
+                if (list.Count > 0)
+                    tree[prop.Name] = list;
+
+                continue;
             }
+
+            // 2) Complex reference types (non-value, non-string)
+            if (!prop.PropertyType.IsValueType && prop.PropertyType != typeof(string))
+            {
+                var valueType = value.GetType();
+
+                // Avoid descending into most framework types (e.g., DateTimeOffset, Uri, List<T> internals, etc.)
+                if (IsFrameworkLeaf(valueType))
+                    continue;
+
+                var sub = GetNullPropertiesTree(value, valueType, visited);
+                if (sub.Count > 0)
+                    tree[prop.Name] = sub;
+
+                continue;
+            }
+
+            // Value types and strings: nothing to do (we only record nulls)
         }
 
-        return nullPropertiesTree;
+        return tree;
     }
 
     /// <summary>
