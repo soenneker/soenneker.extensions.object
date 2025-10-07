@@ -15,9 +15,7 @@ public class ObjectExtensionTests : FixturedUnitTest
     }
 
     [Fact]
-    public void Default()
-    {
-    }
+    public void Default(){}
 
     [Fact]
     public void ToHttpContent_should_not_throw()
@@ -77,13 +75,13 @@ public class ObjectExtensionTests : FixturedUnitTest
         obj.LogNullProperties(Logger);
     }
 
-    //[Fact]
-    //public void LogNullPropertiesRecursivelyAsJson_should_log()
-    //{
-    //    var obj = AutoFaker.Generate<UserDto>();
-    //    obj.Address.AdditionalInfo = null!;
-    //    obj.PhoneNumber = null!;
+    [Fact]
+    public void LogNullPropertiesRecursivelyAsJson_should_log()
+    {
+        var obj = AutoFaker.Generate<UserDto>();
+        obj.Address.AdditionalInfo = null!;
+        obj.PhoneNumber = null!;
 
-    //    obj.LogNullPropertiesRecursivelyAsJson(Logger);
-    //}
+        obj.LogNullPropertiesRecursivelyAsJson(Logger);
+    }
 }
