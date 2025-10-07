@@ -153,7 +153,7 @@ public static partial class ObjectExtension
     public static string ToQueryString(this object? obj)
     {
         if (obj is null)
-            return "";
+            return ""; 
 
         string? serializedObj = JsonUtil.Serialize(obj);
 

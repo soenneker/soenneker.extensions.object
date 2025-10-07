@@ -14,10 +14,18 @@ public class ObjectExtensionTests : FixturedUnitTest
     {
     }
 
-
     [Fact]
     public void Default()
     {
 
+    }
+
+    [Fact]
+    public void ToHttpContent_should_not_throw()
+    {
+        var obj = AutoFaker.Generate<UserDto>();
+
+        var result = obj.ToHttpContent();
+        result.Should().NotBeNull();
     }
 }
