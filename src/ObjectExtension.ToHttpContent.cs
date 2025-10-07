@@ -67,7 +67,7 @@ public static partial class ObjectExtension
     /// <remarks>
     /// Uses JsonUtil.WebOptions for JSON serialization.
     /// </remarks>
-    [Pure]
+    [Pure] 
     public static (HttpContent httpContent, string str) ToHttpContentAndString(this object? obj)
     {
         string? jsonContent = obj != null ? JsonUtil.Serialize(obj) : "";
