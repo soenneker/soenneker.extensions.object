@@ -77,7 +77,7 @@ public static partial class ObjectExtension
                     .Length == 0)
                 .ToArray();
             var nameArr = new string[filtered.Length];
-            for (int i = 0; i < filtered.Length; i++)
+            for (var i = 0; i < filtered.Length; i++)
                 nameArr[i] = filtered[i]
                     .GetCustomAttribute<JsonPropertyNameAttribute>(false)
                     ?.Name ?? filtered[i].Name;
@@ -86,7 +86,7 @@ public static partial class ObjectExtension
 
         var dict = new Dictionary<string, object?>(props.Length);
 
-        for (int i = 0; i < props.Length; i++)
+        for (var i = 0; i < props.Length; i++)
         {
             dict[names[i]] = props[i]
                 .GetValue(source);
@@ -117,9 +117,9 @@ public static partial class ObjectExtension
 
         using var sb = new PooledStringBuilder();
 
-        bool any = false;
+        var any = false;
 
-        for (int i = 0; i < props.Length; i++)
+        for (var i = 0; i < props.Length; i++)
         {
             var p = props[i];
             var val = p.GetValue(obj);
@@ -160,7 +160,7 @@ public static partial class ObjectExtension
         if (serializedObj.IsNullOrEmpty())
             return "";
 
-        var dictionary = JsonUtil.Deserialize<Dictionary<string, JsonElement>>(serializedObj!);
+        var dictionary = JsonUtil.Deserialize<Dictionary<string, JsonElement>>(serializedObj);
 
         if (dictionary is null || dictionary.Count == 0)
             return "";

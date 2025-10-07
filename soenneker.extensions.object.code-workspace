@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../../Tests/soenneker.tests.fixturedunit"
+		},
+		{
+			"path": "../../Tests/soenneker.tests.unit"
+		},
+		{
+			"path": "../../Tests/soenneker.tests.benchmark"
+		}
+	],
+	"settings": {}
+}
