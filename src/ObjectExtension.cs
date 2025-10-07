@@ -22,7 +22,7 @@ namespace Soenneker.Extensions.Object;
 /// <summary>
 /// A collection of helpful Object extension methods
 /// </summary>
-public static partial class ObjectExtension
+public static partial class ObjectExtension 
 {
     private static readonly ConcurrentDictionary<System.Type, (PropertyInfo[] Props, string[] Names)> _declaredPropCache = new();
     private static readonly ConcurrentDictionary<System.Type, PropertyInfo[]> _publicPropCache = new();
