@@ -19,7 +19,7 @@ using Soenneker.Utils.PooledStringBuilders;
 
 namespace Soenneker.Extensions.Object;
 
-/// <summary>
+/// <summary> 
 /// A collection of helpful Object extension methods
 /// </summary>
 public static partial class ObjectExtension

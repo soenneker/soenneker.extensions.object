@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using Serilog.Sinks.XUnit.Injectable.Abstract;
 using Soenneker.Fixtures.Unit;
 using Soenneker.Utils.Test;
 
@@ -21,5 +22,17 @@ public class Fixture : UnitFixture
 
         IConfiguration config = TestUtil.BuildConfig();
         services.AddSingleton(config);
+    }
+
+    public override async System.Threading.Tasks.ValueTask DisposeAsync()
+    {
+        if (ServiceProvider != null)
+        {
+            var sink = ServiceProvider.GetService<IInjectableTestOutputSink>();
+            if (sink != null)
+                await sink.DisposeAsync();
+        }
+
+        await base.DisposeAsync();
     }
 }
