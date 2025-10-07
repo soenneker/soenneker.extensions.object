@@ -21,7 +21,7 @@ public static partial class ObjectExtension
     /// If the object is <c>null</c>, returns an <see cref="HttpContent"/> with empty content.
     /// </returns>
     /// <remarks>
-    /// This method does not log the result. For logging options, see <see cref="IJsonUtil"/>.
+    /// This method does not log the result. For logging options, see <see cref="JsonUtil"/>.
     /// </remarks>
     [Pure]
     public static HttpContent ToHttpContent(this object? obj)
