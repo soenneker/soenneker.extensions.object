@@ -22,7 +22,7 @@ namespace Soenneker.Extensions.Object;
 /// <summary>
 /// A collection of helpful Object extension methods
 /// </summary>
-public static partial class ObjectExtension  
+public static partial class ObjectExtension
 {
     private static readonly ConcurrentDictionary<System.Type, (PropertyInfo[] Props, string[] Names)> _declaredPropCache = new();
     private static readonly ConcurrentDictionary<System.Type, PropertyInfo[]> _publicPropCache = new();
@@ -153,7 +153,7 @@ public static partial class ObjectExtension
     public static string ToQueryString(this object? obj)
     {
         if (obj is null)
-            return ""; 
+            return "";
 
         string? serializedObj = JsonUtil.Serialize(obj);
 
@@ -261,15 +261,15 @@ public static partial class ObjectExtension
 
         // Don’t descend into most framework types (except we still handle IEnumerable separately below)
         // This avoids spelunking into things like List<T> internals via properties.
-        static bool IsFrameworkLeaf(System.Type t)
-            => t.Namespace is string ns &&
-               (ns.StartsWith("System", StringComparison.Ordinal) ||
-                ns.StartsWith("Microsoft", StringComparison.Ordinal));
+        static bool IsFrameworkLeaf(System.Type t) => t.Namespace is string ns &&
+                                                      (ns.StartsWith("System", StringComparison.Ordinal) ||
+                                                       ns.StartsWith("Microsoft", StringComparison.Ordinal));
 
         foreach (PropertyInfo prop in objectType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
         {
             // Skip indexers and non-readable props
-            if (prop.GetIndexParameters().Length > 0 || !prop.CanRead)
+            if (prop.GetIndexParameters()
+                    .Length > 0 || !prop.CanRead)
                 continue;
 
             object? value;
