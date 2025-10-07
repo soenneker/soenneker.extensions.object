@@ -75,4 +75,13 @@ public class ObjectExtensionTests : FixturedUnitTest
         obj.LogNullProperties(Logger);
     }
 
+    [Fact]
+    public void LogNullPropertiesRecursivelyAsJson_should_log()
+    {
+        var obj = AutoFaker.Generate<UserDto>();
+        obj.Address.AdditionalInfo = null!;
+        obj.PhoneNumber = null!;
+
+        obj.LogNullPropertiesRecursivelyAsJson(Logger);
+    }
 }
