@@ -11,6 +11,9 @@
 		},
 		{
 			"path": "../../Tests/soenneker.tests.benchmark"
+		},
+		{
+			"path": "../../serilog-sinks-xunit-injectable"
 		}
 	],
 	"settings": {}

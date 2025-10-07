@@ -24,7 +24,7 @@ public static partial class ObjectExtension
         try
         {
             return ToHttpContent(obj);
-        }
+        } 
         catch (JsonSerializationException ex)
         {
             logger?.LogError(ex, "Failed to serialize object to HttpContent for type ({type})", obj?.GetType()
