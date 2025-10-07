@@ -86,7 +86,7 @@ public static partial class ObjectExtension
         try
         {
             return ToHttpContentWithKey(obj, apiKey);
-        }
+        } 
         catch (JsonSerializationException ex)
         {
             logger?.LogError(ex, "Failed to serialize object to HttpContent for type ({type})", obj?.GetType()
