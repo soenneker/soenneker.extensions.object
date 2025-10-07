@@ -77,7 +77,7 @@ public static partial class ObjectExtension
     /// <param name="obj">The object to serialize.</param>
     /// <param name="apiKey">The API key to add as a header.</param>
     /// <param name="logger">Optional <see cref="ILogger"/> for logging errors.</param>
-    /// <returns>
+    /// <returns> 
     /// An <see cref="HttpContent"/> with the 'x-api-key' header added, or <c>null</c> if an error occurs.
     /// </returns>
     [Pure]
