@@ -1,6 +1,6 @@
 using AwesomeAssertions;
 using Soenneker.Extensions.Object.Tests.Dtos;
-using Soenneker.Tests.FixturedUnit;
+using Soenneker.Tests.Unit;
 using Soenneker.Utils.Json;
 using Xunit;
 
@@ -8,9 +8,9 @@ using Xunit;
 namespace Soenneker.Extensions.Object.Tests;
 
 [Collection("Collection")]
-public class ObjectExtensionTests : FixturedUnitTest
+public class ObjectExtensionTests : UnitTest
 {
-    public ObjectExtensionTests(Fixture fixture, ITestOutputHelper outputHelper) : base(fixture, outputHelper)
+    public ObjectExtensionTests(ITestOutputHelper outputHelper) : base(outputHelper)
     {
     }
 
@@ -20,7 +20,8 @@ public class ObjectExtensionTests : FixturedUnitTest
         var obj = AutoFaker.Generate<UserDto>();
 
         var result = obj.ToHttpContent();
-        result.Should().NotBeNull();
+        result.Should()
+            .NotBeNull();
     }
 
     [Fact]
@@ -30,7 +31,9 @@ public class ObjectExtensionTests : FixturedUnitTest
 
         var result = obj.ToHttpContent();
         string content = await result.ReadAsStringAsync(CancellationToken);
-        JsonUtil.Deserialize<UserDto>(content).Should().BeEquivalentTo(obj);
+        JsonUtil.Deserialize<UserDto>(content)
+            .Should()
+            .BeEquivalentTo(obj);
     }
 
     [Fact]
@@ -40,7 +43,8 @@ public class ObjectExtensionTests : FixturedUnitTest
         user.FirstName = null;
 
         string result = user.ToQueryStringViaReflection();
-        result.Should().NotContain("firstName");
+        result.Should()
+            .NotContain("firstName");
     }
 
     [Fact]
@@ -50,7 +54,8 @@ public class ObjectExtensionTests : FixturedUnitTest
         user.FirstName = null;
 
         string result = user.ToQueryString();
-        result.Should().NotContain("firstName");
+        result.Should()
+            .NotContain("firstName");
     }
 
     [Fact]
@@ -60,7 +65,8 @@ public class ObjectExtensionTests : FixturedUnitTest
         user.IsActive = true;
 
         string result = user.ToQueryString();
-        result.Should().NotContain("True");
+        result.Should()
+            .NotContain("True");
     }
 
     [Fact]

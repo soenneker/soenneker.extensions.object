@@ -71,7 +71,7 @@ public static partial class ObjectExtension
     public static (HttpContent httpContent, string str) ToHttpContentAndString(this object? obj)
     {
         string? jsonContent = obj != null ? JsonUtil.Serialize(obj) : "";
-
+         
         var content = new StringContent(jsonContent!, Encoding.UTF8, MediaTypeNames.Application.Json);
         return (content, jsonContent!);
     }
