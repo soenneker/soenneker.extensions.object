@@ -10,13 +10,7 @@ namespace Soenneker.Extensions.Object;
 
 public static partial class ObjectExtension
 {
-    private sealed class PropertyMap
-    {
-        public required string Name { get; init; }
-        public required Func<object, object?> Getter { get; init; }
-    }
-
-    private static readonly ConcurrentDictionary<System.Type, PropertyMap[]> _cache = new();
+    private static readonly ConcurrentDictionary<System.Type, (PropertyInfo[] Props, string[] Names)> _formUrlEncodedPropCache = new();
 
     /// <summary>
     /// Converts an object into FormUrlEncodedContent using reflection,
@@ -29,83 +23,51 @@ public static partial class ObjectExtension
             throw new ArgumentNullException(nameof(obj));
 
         System.Type type = obj.GetType();
-        PropertyMap[] maps = GetPropertyMaps(type);
 
-        var list = new List<KeyValuePair<string, string>>(maps.Length);
-
-        foreach (PropertyMap map in maps)
+        // Cache properties and names
+        (PropertyInfo[] props, string[] names) = _formUrlEncodedPropCache.GetOrAdd(type, static t =>
         {
-            object? value = map.Getter(obj);
+            const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public;
+            PropertyInfo[] raw = t.GetProperties(flags);
+            
+            // Filter to readable, non-indexer properties
+            var filtered = new List<PropertyInfo>(raw.Length);
+            for (var i = 0; i < raw.Length; i++)
+            {
+                PropertyInfo prop = raw[i];
+                if (prop.CanRead && prop.GetIndexParameters().Length == 0)
+                    filtered.Add(prop);
+            }
+
+            PropertyInfo[] propsArray = new PropertyInfo[filtered.Count];
+            var nameArr = new string[filtered.Count];
+            for (var i = 0; i < filtered.Count; i++)
+            {
+                PropertyInfo prop = filtered[i];
+                propsArray[i] = prop;
+                nameArr[i] = prop.GetCustomAttribute<JsonPropertyNameAttribute>(false)?.Name ?? prop.Name;
+            }
+
+            return (propsArray, nameArr);
+        });
+
+        var list = new List<KeyValuePair<string, string>>(props.Length);
+
+        for (var i = 0; i < props.Length; i++)
+        {
+            object? value = props[i].GetValue(obj);
             if (value is null)
                 continue;
 
             string stringValue = ConvertToString(value);
-            list.Add(new KeyValuePair<string, string>(map.Name, stringValue));
+            list.Add(new KeyValuePair<string, string>(names[i], stringValue));
         }
 
         return new FormUrlEncodedContent(list);
     }
 
-    private static PropertyMap[] GetPropertyMaps(System.Type type)
-    {
-        return _cache.GetOrAdd(type, static t =>
-        {
-            PropertyInfo[] props = t.GetProperties(BindingFlags.Instance | BindingFlags.Public);
-
-            var maps = new List<PropertyMap>(props.Length);
-
-            foreach (PropertyInfo prop in props)
-            {
-                if (!prop.CanRead)
-                    continue;
-
-                if (prop.GetIndexParameters()
-                        .Length != 0)
-                    continue; // skip indexers
-
-                // Determine form key name (JsonPropertyName if present)
-                string name = prop.Name;
-
-                var jsonNameAttr = prop.GetCustomAttribute<JsonPropertyNameAttribute>();
-
-                if (jsonNameAttr is not null && !string.IsNullOrWhiteSpace(jsonNameAttr.Name))
-                    name = jsonNameAttr.Name;
-
-                // Build a fast-ish getter delegate
-                MethodInfo getMethod = prop.GetMethod!;
-                Func<object, object?> getter;
-
-                if (getMethod.IsStatic)
-                {
-                    // Unlikely, but handle anyway
-                    getter = _ => getMethod.Invoke(null, null);
-                }
-                else
-                {
-                    // Create an open delegate where possible
-                    System.Type declaringType = getMethod.DeclaringType!;
-                    System.Type returnType = getMethod.ReturnType;
-
-                    System.Type delegateType = typeof(Func<,>).MakeGenericType(declaringType, returnType);
-                    Delegate del = getMethod.CreateDelegate(delegateType);
-
-                    getter = target => del.DynamicInvoke(target);
-                }
-
-                maps.Add(new PropertyMap
-                {
-                    Name = name,
-                    Getter = getter
-                });
-            }
-
-            return maps.ToArray();
-        });
-    }
-
     private static string ConvertToString(object value)
     {
-        // Avoid boxing where we can
         return value switch
         {
             string s => s,
