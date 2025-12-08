@@ -105,8 +105,8 @@ public static partial class ObjectExtension
         if (obj is null)
             return string.Empty;
 
-        var type = obj.GetType();
-        var props = _publicPropCache.GetOrAdd(type, t =>
+        System.Type type = obj.GetType();
+        PropertyInfo[] props = _publicPropCache.GetOrAdd(type, t =>
         {
             const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public;
             return t.GetProperties(flags)
@@ -121,15 +121,15 @@ public static partial class ObjectExtension
 
         for (var i = 0; i < props.Length; i++)
         {
-            var p = props[i];
-            var val = p.GetValue(obj);
+            PropertyInfo p = props[i];
+            object? val = p.GetValue(obj);
             if (val is null)
                 continue;
 
             sb.Append(any ? '&' : '?');
             any = true;
 
-            var name = p.Name.ToEscaped();
+            string name = p.Name.ToEscaped();
             if (loweredPropertyNames)
                 name = name.ToLowerInvariantFast(); // already your fast path
 
@@ -293,7 +293,7 @@ public static partial class ObjectExtension
             if (value is IEnumerable enumerable && value is not string)
             {
                 var list = new List<object?>();
-                foreach (var item in enumerable)
+                foreach (object? item in enumerable)
                 {
                     if (item is null)
                     {
@@ -301,7 +301,7 @@ public static partial class ObjectExtension
                         continue;
                     }
 
-                    var itemType = item.GetType();
+                    System.Type itemType = item.GetType();
                     if (IsFrameworkLeaf(itemType))
                     {
                         // We don't reflect into framework types here; only record nulls of nested objects,
@@ -309,7 +309,7 @@ public static partial class ObjectExtension
                         continue;
                     }
 
-                    var itemTree = GetNullPropertiesTree(item, itemType, visited);
+                    Dictionary<string, object?> itemTree = GetNullPropertiesTree(item, itemType, visited);
                     if (itemTree.Count > 0)
                         list.Add(itemTree);
                 }
@@ -323,13 +323,13 @@ public static partial class ObjectExtension
             // 2) Complex reference types (non-value, non-string)
             if (!prop.PropertyType.IsValueType && prop.PropertyType != typeof(string))
             {
-                var valueType = value.GetType();
+                System.Type valueType = value.GetType();
 
                 // Avoid descending into most framework types (e.g., DateTimeOffset, Uri, List<T> internals, etc.)
                 if (IsFrameworkLeaf(valueType))
                     continue;
 
-                var sub = GetNullPropertiesTree(value, valueType, visited);
+                Dictionary<string, object?> sub = GetNullPropertiesTree(value, valueType, visited);
                 if (sub.Count > 0)
                     tree[prop.Name] = sub;
 
