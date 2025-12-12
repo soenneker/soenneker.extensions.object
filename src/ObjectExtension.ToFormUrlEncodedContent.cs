@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
@@ -30,7 +30,7 @@ public static partial class ObjectExtension
             const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public;
             PropertyInfo[] raw = t.GetProperties(flags);
             
-            // Filter to readable, non-indexer properties
+            // Filter to readable, non-indexer properties - avoid intermediate list allocation
             var filtered = new List<PropertyInfo>(raw.Length);
             for (var i = 0; i < raw.Length; i++)
             {
@@ -39,9 +39,10 @@ public static partial class ObjectExtension
                     filtered.Add(prop);
             }
 
-            PropertyInfo[] propsArray = new PropertyInfo[filtered.Count];
-            var nameArr = new string[filtered.Count];
-            for (var i = 0; i < filtered.Count; i++)
+            int count = filtered.Count;
+            PropertyInfo[] propsArray = new PropertyInfo[count];
+            var nameArr = new string[count];
+            for (var i = 0; i < count; i++)
             {
                 PropertyInfo prop = filtered[i];
                 propsArray[i] = prop;

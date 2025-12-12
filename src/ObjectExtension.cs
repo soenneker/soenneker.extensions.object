@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using Soenneker.Extensions.Enumerable.String;
 using Soenneker.Extensions.String;
 using Soenneker.Extensions.Type;
@@ -72,16 +72,26 @@ public static partial class ObjectExtension
         {
             const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly;
             PropertyInfo[] raw = t.GetProperties(flags);
-            // Filter to readable, non-indexer once
-            PropertyInfo[] filtered = raw.Where(p => p.CanRead && p.GetIndexParameters()
-                    .Length == 0)
-                .ToArray();
-            var nameArr = new string[filtered.Length];
-            for (var i = 0; i < filtered.Length; i++)
-                nameArr[i] = filtered[i]
-                    .GetCustomAttribute<JsonPropertyNameAttribute>(false)
-                    ?.Name ?? filtered[i].Name;
-            return (filtered, nameArr);
+            // Filter to readable, non-indexer once - avoid LINQ allocations
+            var filtered = new List<PropertyInfo>(raw.Length);
+            for (var i = 0; i < raw.Length; i++)
+            {
+                PropertyInfo p = raw[i];
+                if (p.CanRead && p.GetIndexParameters().Length == 0)
+                    filtered.Add(p);
+            }
+            // Create arrays directly from list to avoid intermediate ToArray allocation
+            int count = filtered.Count;
+            PropertyInfo[] filteredArray = new PropertyInfo[count];
+            var nameArr = new string[count];
+            for (var i = 0; i < count; i++)
+            {
+                PropertyInfo prop = filtered[i];
+                filteredArray[i] = prop;
+                nameArr[i] = prop.GetCustomAttribute<JsonPropertyNameAttribute>(false)
+                    ?.Name ?? prop.Name;
+            }
+            return (filteredArray, nameArr);
         });
 
         var dict = new Dictionary<string, object?>(props.Length);
@@ -109,10 +119,23 @@ public static partial class ObjectExtension
         PropertyInfo[] props = _publicPropCache.GetOrAdd(type, t =>
         {
             const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public;
-            return t.GetProperties(flags)
-                .Where(p => p.CanRead && p.GetIndexParameters()
-                    .Length == 0)
-                .ToArray();
+            PropertyInfo[] raw = t.GetProperties(flags);
+            // Filter to readable, non-indexer - avoid LINQ allocations
+            var filtered = new List<PropertyInfo>(raw.Length);
+            for (var i = 0; i < raw.Length; i++)
+            {
+                PropertyInfo p = raw[i];
+                if (p.CanRead && p.GetIndexParameters().Length == 0)
+                    filtered.Add(p);
+            }
+            // Create array directly from list to avoid intermediate ToArray allocation
+            int count = filtered.Count;
+            PropertyInfo[] result = new PropertyInfo[count];
+            for (var i = 0; i < count; i++)
+            {
+                result[i] = filtered[i];
+            }
+            return result;
         });
 
         using var sb = new PooledStringBuilder();
@@ -203,9 +226,10 @@ public static partial class ObjectExtension
         }
 
         System.Type objectType = obj.GetType();
-        var nullProperties = new List<string>();
+        PropertyInfo[] properties = objectType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+        var nullProperties = new List<string>(properties.Length);
 
-        foreach (PropertyInfo property in objectType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        foreach (PropertyInfo property in properties)
         {
             if (property.GetValue(obj) is null)
             {
@@ -254,18 +278,20 @@ public static partial class ObjectExtension
 
     private static Dictionary<string, object?> GetNullPropertiesTree(object obj, System.Type objectType, HashSet<object> visited)
     {
-        var tree = new Dictionary<string, object?>();
+        // Pre-allocate dictionary capacity based on property count
+        PropertyInfo[] properties = objectType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+        var tree = new Dictionary<string, object?>(properties.Length);
 
         if (!visited.Add(obj))
             return tree; // prevent cycles
 
-        // Don’t descend into most framework types (except we still handle IEnumerable separately below)
+        // Don't descend into most framework types (except we still handle IEnumerable separately below)
         // This avoids spelunking into things like List<T> internals via properties.
         static bool IsFrameworkLeaf(System.Type t) => t.Namespace is string ns &&
                                                       (ns.StartsWith("System", StringComparison.Ordinal) ||
                                                        ns.StartsWith("Microsoft", StringComparison.Ordinal));
 
-        foreach (PropertyInfo prop in objectType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+        foreach (PropertyInfo prop in properties)
         {
             // Skip indexers and non-readable props
             if (prop.GetIndexParameters()
@@ -385,15 +411,18 @@ public static partial class ObjectExtension
                     .Length == 0)
             {
                 object? value = property.GetValue(obj, null);
-                var propertyName = $"{indent}{property.Name}:";
+                
+                stringBuilder.Append(indent);
+                stringBuilder.Append(property.Name);
+                stringBuilder.Append(':');
 
                 if (value == null)
                 {
-                    stringBuilder.AppendLine($"{propertyName} null");
+                    stringBuilder.AppendLine(" null");
                 }
                 else if (value is IEnumerable enumerable and not string)
                 {
-                    stringBuilder.AppendLine(propertyName);
+                    stringBuilder.AppendLine();
 
                     foreach (object? item in enumerable)
                     {
@@ -404,12 +433,13 @@ public static partial class ObjectExtension
                              .IsClass && !value.GetType()
                              .IsPrimitive && value is not string)
                 {
-                    stringBuilder.AppendLine(propertyName);
+                    stringBuilder.AppendLine();
                     stringBuilder.Append(value.ToReadableString(indentLevel + 1));
                 }
                 else
                 {
-                    stringBuilder.AppendLine($"{propertyName} {value}");
+                    stringBuilder.Append(' ');
+                    stringBuilder.AppendLine(value.ToString());
                 }
             }
         }
