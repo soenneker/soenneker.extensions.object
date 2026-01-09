@@ -9,10 +9,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Soenneker.Utils.PooledStringBuilders;
@@ -37,7 +35,7 @@ public static partial class ObjectExtension
     public static bool IsObjectNumeric(this object obj)
     {
         return obj.GetType()
-            .IsNumeric();
+                  .IsNumeric();
     }
 
     /// <summary>
@@ -77,9 +75,11 @@ public static partial class ObjectExtension
             for (var i = 0; i < raw.Length; i++)
             {
                 PropertyInfo p = raw[i];
-                if (p.CanRead && p.GetIndexParameters().Length == 0)
+                if (p.CanRead && p.GetIndexParameters()
+                                  .Length == 0)
                     filtered.Add(p);
             }
+
             // Create arrays directly from list to avoid intermediate ToArray allocation
             int count = filtered.Count;
             PropertyInfo[] filteredArray = new PropertyInfo[count];
@@ -89,8 +89,9 @@ public static partial class ObjectExtension
                 PropertyInfo prop = filtered[i];
                 filteredArray[i] = prop;
                 nameArr[i] = prop.GetCustomAttribute<JsonPropertyNameAttribute>(false)
-                    ?.Name ?? prop.Name;
+                                 ?.Name ?? prop.Name;
             }
+
             return (filteredArray, nameArr);
         });
 
@@ -125,9 +126,11 @@ public static partial class ObjectExtension
             for (var i = 0; i < raw.Length; i++)
             {
                 PropertyInfo p = raw[i];
-                if (p.CanRead && p.GetIndexParameters().Length == 0)
+                if (p.CanRead && p.GetIndexParameters()
+                                  .Length == 0)
                     filtered.Add(p);
             }
+
             // Create array directly from list to avoid intermediate ToArray allocation
             int count = filtered.Count;
             PropertyInfo[] result = new PropertyInfo[count];
@@ -135,6 +138,7 @@ public static partial class ObjectExtension
             {
                 result[i] = filtered[i];
             }
+
             return result;
         });
 
@@ -159,7 +163,7 @@ public static partial class ObjectExtension
             sb.Append(name);
             sb.Append('=');
             sb.Append(val.ToString()
-                .ToEscaped());
+                         .ToEscaped());
         }
 
         return any ? sb.ToString() : string.Empty;
@@ -188,7 +192,7 @@ public static partial class ObjectExtension
         if (dictionary is null || dictionary.Count == 0)
             return "";
 
-        var queryBuilder = new StringBuilder(dictionary.Count * 10);
+        using var queryBuilder = new PooledStringBuilder(dictionary.Count * 10);
         queryBuilder.Append('?');
 
         foreach (KeyValuePair<string, JsonElement> qs in dictionary)
@@ -198,15 +202,15 @@ public static partial class ObjectExtension
                 JsonValueKind.True => "true",
                 JsonValueKind.False => "false",
                 _ => qs.Value.ToString()
-                    .ToEscaped()
+                       .ToEscaped()
             };
 
             if (queryBuilder.Length > 1)
                 queryBuilder.Append('&');
 
-            queryBuilder.Append(qs.Key)
-                .Append('=')
-                .Append(value);
+            queryBuilder.Append(qs.Key);
+            queryBuilder.Append('=');
+            queryBuilder.Append(value);
         }
 
         return queryBuilder.ToString();
@@ -401,24 +405,25 @@ public static partial class ObjectExtension
 
         System.Type type = obj.GetType();
         PropertyInfo[] properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-        var stringBuilder = new StringBuilder();
+        using var stringBuilder = new PooledStringBuilder();
 
         var indent = new string(' ', indentLevel * 2);
 
         foreach (PropertyInfo property in properties)
         {
             if (property.GetIndexParameters()
-                    .Length == 0)
+                        .Length == 0)
             {
                 object? value = property.GetValue(obj, null);
-                
+
                 stringBuilder.Append(indent);
                 stringBuilder.Append(property.Name);
                 stringBuilder.Append(':');
 
                 if (value == null)
                 {
-                    stringBuilder.AppendLine(" null");
+                    stringBuilder.Append(" null");
+                    stringBuilder.AppendLine();
                 }
                 else if (value is IEnumerable enumerable and not string)
                 {
@@ -430,8 +435,8 @@ public static partial class ObjectExtension
                     }
                 }
                 else if (value.GetType()
-                             .IsClass && !value.GetType()
-                             .IsPrimitive && value is not string)
+                              .IsClass && !value.GetType()
+                                                .IsPrimitive && value is not string)
                 {
                     stringBuilder.AppendLine();
                     stringBuilder.Append(value.ToReadableString(indentLevel + 1));
@@ -439,7 +444,8 @@ public static partial class ObjectExtension
                 else
                 {
                     stringBuilder.Append(' ');
-                    stringBuilder.AppendLine(value.ToString());
+                    stringBuilder.Append(value.ToString());
+                    stringBuilder.AppendLine();
                 }
             }
         }
