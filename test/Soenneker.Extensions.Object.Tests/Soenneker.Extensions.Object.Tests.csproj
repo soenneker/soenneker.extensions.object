@@ -1,10 +1,13 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <OutputType>Exe</OutputType>
         <TargetFramework>net10.0</TargetFramework>
         <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
         <UseMicrosoftTestingPlatform>false</UseMicrosoftTestingPlatform>
+            <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+            <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
     </PropertyGroup>
 
     <ItemGroup>
@@ -17,9 +20,7 @@
         </Content>
     </ItemGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
-        <PackageReference Include="Soenneker.Dtos.StreetAddress" Version="4.0.482" />
+    <ItemGroup><PackageReference Include="Soenneker.Dtos.StreetAddress" Version="4.0.482" />
         <PackageReference Include="Soenneker.Facts.Local" Version="4.0.551" />
         <PackageReference Include="Soenneker.Facts.Manual" Version="4.0.163" />
         <PackageReference Include="Soenneker.Tests.Benchmark" Version="4.0.62" />
@@ -34,6 +35,12 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\Soenneker.Extensions.Object.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="testconfig.json">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
     </ItemGroup>
 
 </Project>
