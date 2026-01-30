@@ -25,7 +25,7 @@
     <ItemGroup><PackageReference Include="Soenneker.Dtos.StreetAddress" Version="4.0.482" />
         <PackageReference Include="Soenneker.Facts.Local" Version="4.0.558" />
         <PackageReference Include="Soenneker.Facts.Manual" Version="4.0.164" />
-        <PackageReference Include="Soenneker.Tests.Benchmark" Version="4.0.62" />
+        <PackageReference Include="Soenneker.Tests.Benchmark" Version="4.0.63" />
         <PackageReference Include="Soenneker.Tests.FixturedUnit" Version="4.0.2175" />
         <PackageReference Include="Soenneker.Utils.Test" Version="4.0.302" />
         <PackageReference Include="xUnit.v3" Version="3.2.2" />
