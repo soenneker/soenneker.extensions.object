@@ -23,7 +23,7 @@
     </ItemGroup>
 
     <ItemGroup><PackageReference Include="Soenneker.Dtos.StreetAddress" Version="4.0.490" />
-        <PackageReference Include="Soenneker.Facts.Local" Version="4.0.585" />
+        <PackageReference Include="Soenneker.Facts.Local" Version="4.0.590" />
         <PackageReference Include="Soenneker.Facts.Manual" Version="4.0.169" />
         <PackageReference Include="Soenneker.Tests.Benchmark" Version="4.0.66" />
         <PackageReference Include="Soenneker.Tests.FixturedUnit" Version="4.0.2234" />
