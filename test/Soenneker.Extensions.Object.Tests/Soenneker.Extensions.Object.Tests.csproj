@@ -22,7 +22,7 @@
         </Content>
     </ItemGroup>
 
-    <ItemGroup><PackageReference Include="Soenneker.Dtos.StreetAddress" Version="4.0.499" />
+    <ItemGroup><PackageReference Include="Soenneker.Dtos.StreetAddress" Version="4.0.503" />
         <PackageReference Include="Soenneker.Facts.Local" Version="4.0.606" />
         <PackageReference Include="Soenneker.Facts.Manual" Version="4.0.174" />
         <PackageReference Include="Soenneker.Tests.Benchmark" Version="4.0.75" />
