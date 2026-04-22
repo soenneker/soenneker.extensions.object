@@ -3,20 +3,18 @@ using BenchmarkDotNet.Running;
 using Soenneker.Benchmarking.Extensions.Summary;
 using Soenneker.Facts.Manual;
 using Soenneker.Tests.Benchmark;
-using Xunit;
-
 
 namespace Soenneker.Extensions.Object.Tests.Benchmarks;
 
-[Collection("Collection")]
+[ClassDataSource<Host>(Shared = SharedType.PerTestSession)]
 public class BenchmarkTestRunner : BenchmarkTest
 {
-    public BenchmarkTestRunner(Fixture fixture, ITestOutputHelper outputHelper) : base(outputHelper)
+    public BenchmarkTestRunner(Host host) : base(outputHelper)
     {
     }
 
     [ManualFact]
-    //[LocalFact]
+    //[LocalOnly]
     public async System.Threading.Tasks.Task ExtensionBenchmarks()
     {
         Summary summary = BenchmarkRunner.Run<ExtensionBenchmarks>(DefaultConf);

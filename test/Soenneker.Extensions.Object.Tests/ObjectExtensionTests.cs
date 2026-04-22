@@ -1,24 +1,22 @@
 using AwesomeAssertions;
 using Soenneker.Extensions.Object.Tests.Dtos;
-using Soenneker.Tests.FixturedUnit;
+using Soenneker.Tests.HostedUnit;
 using Soenneker.Utils.Json;
 using System;
-using Xunit;
-
 
 namespace Soenneker.Extensions.Object.Tests;
 
-[Collection("Collection")]
-public class ObjectExtensionTests : FixturedUnitTest
+[ClassDataSource<Host>(Shared = SharedType.PerTestSession)]
+public class ObjectExtensionTests : HostedUnitTest
 {
-    public ObjectExtensionTests(Fixture fixture, ITestOutputHelper outputHelper) : base(fixture, outputHelper)
+    public ObjectExtensionTests(Host host) : base(host)
     {
     }
 
-    [Fact]
+    [Test]
     public void Default(){}
 
-    [Fact]
+    [Test]
     public void ToHttpContent_should_not_throw()
     {
         var obj = AutoFaker.Generate<UserDto>();
@@ -27,7 +25,7 @@ public class ObjectExtensionTests : FixturedUnitTest
         result.Should().NotBeNull();
     }
 
-    [Fact]
+    [Test]
     public async System.Threading.Tasks.Task ToHttpContent_should_deserialize()
     {
         var obj = AutoFaker.Generate<UserDto>();
@@ -37,7 +35,7 @@ public class ObjectExtensionTests : FixturedUnitTest
         JsonUtil.Deserialize<UserDto>(content).Should().BeEquivalentTo(obj);
     }
 
-    [Fact]
+    [Test]
     public void ToQueryStringViaReflection_handles_null()
     {
         var user = AutoFaker.Generate<UserDto>();
@@ -47,7 +45,7 @@ public class ObjectExtensionTests : FixturedUnitTest
         result.Should().NotContain("firstName");
     }
 
-    [Fact]
+    [Test]
     public void ToQueryString_handles_null()
     {
         var user = AutoFaker.Generate<UserDto>();
@@ -57,7 +55,7 @@ public class ObjectExtensionTests : FixturedUnitTest
         result.Should().NotContain("firstName");
     }
 
-    [Fact]
+    [Test]
     public void ToQueryString_lowercase_bool()
     {
         var user = AutoFaker.Generate<UserDto>();
@@ -67,7 +65,7 @@ public class ObjectExtensionTests : FixturedUnitTest
         result.Should().NotContain("True");
     }
 
-    [Fact]
+    [Test]
     public void LogNullProperties_should_log()
     {
         var obj = AutoFaker.Generate<UserDto>();
@@ -76,7 +74,7 @@ public class ObjectExtensionTests : FixturedUnitTest
         obj.LogNullProperties(Logger);
     }
 
-    [Fact]
+    [Test]
     public void LogNullPropertiesRecursivelyAsJson_should_log()
     {
         var obj = AutoFaker.Generate<UserDto>();
@@ -86,7 +84,7 @@ public class ObjectExtensionTests : FixturedUnitTest
         obj.LogNullPropertiesRecursivelyAsJson(Logger);
     }
 
-    [Fact]
+    [Test]
     public void ToFormUrlEncodedContent_should_throw_on_null()
     {
         object? obj = null;
@@ -95,7 +93,7 @@ public class ObjectExtensionTests : FixturedUnitTest
         act.Should().Throw<ArgumentNullException>();
     }
 
-    [Fact]
+    [Test]
     public async System.Threading.Tasks.Task ToFormUrlEncodedContent_should_create_content()
     {
         var obj = new { Name = "Test", Value = 123 };
@@ -108,7 +106,7 @@ public class ObjectExtensionTests : FixturedUnitTest
         content.Should().Contain("Value=123");
     }
 
-    [Fact]
+    [Test]
     public async System.Threading.Tasks.Task ToFormUrlEncodedContent_should_use_json_property_name()
     {
         var user = AutoFaker.Generate<UserDto>();
@@ -124,7 +122,7 @@ public class ObjectExtensionTests : FixturedUnitTest
         }
     }
 
-    [Fact]
+    [Test]
     public async System.Threading.Tasks.Task ToFormUrlEncodedContent_should_skip_null_properties()
     {
         var user = AutoFaker.Generate<UserDto>();
@@ -136,7 +134,7 @@ public class ObjectExtensionTests : FixturedUnitTest
         content.Should().NotContain("firstName");
     }
 
-    [Fact]
+    [Test]
     public async System.Threading.Tasks.Task ToFormUrlEncodedContent_should_handle_bool_values()
     {
         var obj = new { IsActive = true, IsDeleted = false };
@@ -148,7 +146,7 @@ public class ObjectExtensionTests : FixturedUnitTest
         content.Should().Contain("IsDeleted=false");
     }
 
-    [Fact]
+    [Test]
     public async System.Threading.Tasks.Task ToFormUrlEncodedContent_should_handle_numeric_types()
     {
         var obj = new
@@ -168,7 +166,7 @@ public class ObjectExtensionTests : FixturedUnitTest
         content.Should().Contain("FloatValue=10.5");
     }
 
-    [Fact]
+    [Test]
     public async System.Threading.Tasks.Task ToFormUrlEncodedContent_should_handle_datetime()
     {
         var dateTime = new DateTime(2024, 1, 15, 10, 30, 0);
@@ -182,7 +180,7 @@ public class ObjectExtensionTests : FixturedUnitTest
         content.Should().Contain("2024");
     }
 
-    [Fact]
+    [Test]
     public async System.Threading.Tasks.Task ToFormUrlEncodedContent_should_handle_empty_object()
     {
         var obj = new { };
@@ -193,7 +191,7 @@ public class ObjectExtensionTests : FixturedUnitTest
         content.Should().BeEmpty();
     }
 
-    [Fact]
+    [Test]
     public async System.Threading.Tasks.Task ToFormUrlEncodedContent_should_handle_object_with_all_null_properties()
     {
         var obj = new { Name = (string?)null, Value = (int?)null };
@@ -204,7 +202,7 @@ public class ObjectExtensionTests : FixturedUnitTest
         content.Should().BeEmpty();
     }
 
-    [Fact]
+    [Test]
     public async System.Threading.Tasks.Task ToFormUrlEncodedContent_should_handle_string_with_special_characters()
     {
         var obj = new { Message = "Hello & World" };
@@ -216,7 +214,7 @@ public class ObjectExtensionTests : FixturedUnitTest
         content.Should().Contain("Message=");
     }
 
-    [Fact]
+    [Test]
     public async System.Threading.Tasks.Task ToFormUrlEncodedContent_should_handle_multiple_properties()
     {
         var user = AutoFaker.Generate<UserDto>();
@@ -234,7 +232,7 @@ public class ObjectExtensionTests : FixturedUnitTest
         content.Should().Contain("UserId=123");
     }
 
-    [Fact]
+    [Test]
     public async System.Threading.Tasks.Task ToFormUrlEncodedContent_should_have_correct_content_type()
     {
         var obj = new { Name = "Test" };
