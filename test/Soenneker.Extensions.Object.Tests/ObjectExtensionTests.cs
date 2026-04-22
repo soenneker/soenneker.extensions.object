@@ -31,7 +31,7 @@ public class ObjectExtensionTests : HostedUnitTest
         var obj = AutoFaker.Generate<UserDto>();
 
         var result = obj.ToHttpContent();
-        string content = await result.ReadAsStringAsync(CancellationToken);
+        string content = await result.ReadAsStringAsync(System.Threading.CancellationToken.None);
         JsonUtil.Deserialize<UserDto>(content).Should().BeEquivalentTo(obj);
     }
 
@@ -101,7 +101,7 @@ public class ObjectExtensionTests : HostedUnitTest
         var result = obj.ToFormUrlEncodedContent();
         result.Should().NotBeNull();
 
-        string content = await result.ReadAsStringAsync(CancellationToken);
+        string content = await result.ReadAsStringAsync(System.Threading.CancellationToken.None);
         content.Should().Contain("Name=Test");
         content.Should().Contain("Value=123");
     }
@@ -112,7 +112,7 @@ public class ObjectExtensionTests : HostedUnitTest
         var user = AutoFaker.Generate<UserDto>();
 
         var result = user.ToFormUrlEncodedContent();
-        string content = await result.ReadAsStringAsync(CancellationToken);
+        string content = await result.ReadAsStringAsync(System.Threading.CancellationToken.None);
 
         // Should use "firstName" from JsonPropertyName attribute, not "FirstName"
         if (user.FirstName != null)
@@ -129,7 +129,7 @@ public class ObjectExtensionTests : HostedUnitTest
         user.FirstName = null;
 
         var result = user.ToFormUrlEncodedContent();
-        string content = await result.ReadAsStringAsync(CancellationToken);
+        string content = await result.ReadAsStringAsync(System.Threading.CancellationToken.None);
 
         content.Should().NotContain("firstName");
     }
@@ -140,7 +140,7 @@ public class ObjectExtensionTests : HostedUnitTest
         var obj = new { IsActive = true, IsDeleted = false };
 
         var result = obj.ToFormUrlEncodedContent();
-        string content = await result.ReadAsStringAsync(CancellationToken);
+        string content = await result.ReadAsStringAsync(System.Threading.CancellationToken.None);
 
         content.Should().Contain("IsActive=true");
         content.Should().Contain("IsDeleted=false");
@@ -158,7 +158,7 @@ public class ObjectExtensionTests : HostedUnitTest
         };
 
         var result = obj.ToFormUrlEncodedContent();
-        string content = await result.ReadAsStringAsync(CancellationToken);
+        string content = await result.ReadAsStringAsync(System.Threading.CancellationToken.None);
 
         content.Should().Contain("IntValue=42");
         content.Should().Contain("DecimalValue=123.45");
@@ -173,7 +173,7 @@ public class ObjectExtensionTests : HostedUnitTest
         var obj = new { CreatedAt = dateTime };
 
         var result = obj.ToFormUrlEncodedContent();
-        string content = await result.ReadAsStringAsync(CancellationToken);
+        string content = await result.ReadAsStringAsync(System.Threading.CancellationToken.None);
 
         // DateTime should be formatted using InvariantCulture
         content.Should().Contain("CreatedAt=");
@@ -186,7 +186,7 @@ public class ObjectExtensionTests : HostedUnitTest
         var obj = new { };
 
         var result = obj.ToFormUrlEncodedContent();
-        string content = await result.ReadAsStringAsync(CancellationToken);
+        string content = await result.ReadAsStringAsync(System.Threading.CancellationToken.None);
 
         content.Should().BeEmpty();
     }
@@ -197,7 +197,7 @@ public class ObjectExtensionTests : HostedUnitTest
         var obj = new { Name = (string?)null, Value = (int?)null };
 
         var result = obj.ToFormUrlEncodedContent();
-        string content = await result.ReadAsStringAsync(CancellationToken);
+        string content = await result.ReadAsStringAsync(System.Threading.CancellationToken.None);
 
         content.Should().BeEmpty();
     }
@@ -208,7 +208,7 @@ public class ObjectExtensionTests : HostedUnitTest
         var obj = new { Message = "Hello & World" };
 
         var result = obj.ToFormUrlEncodedContent();
-        string content = await result.ReadAsStringAsync(CancellationToken);
+        string content = await result.ReadAsStringAsync(System.Threading.CancellationToken.None);
 
         // FormUrlEncodedContent should URL-encode special characters
         content.Should().Contain("Message=");
@@ -224,7 +224,7 @@ public class ObjectExtensionTests : HostedUnitTest
         user.UserId = 123;
 
         var result = user.ToFormUrlEncodedContent();
-        string content = await result.ReadAsStringAsync(CancellationToken);
+        string content = await result.ReadAsStringAsync(System.Threading.CancellationToken.None);
 
         content.Should().Contain("firstName=John");
         content.Should().Contain("LastName=Doe");

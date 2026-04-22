@@ -1,8 +1,6 @@
-using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
-using Serilog.Sinks.XUnit.Injectable.Abstract;
 using Soenneker.TestHosts.Unit;
 using Soenneker.Utils.Test;
 
@@ -10,7 +8,7 @@ namespace Soenneker.Extensions.Object.Tests;
 
 public class Host : UnitTestHost
 {
-    public override async Task InitializeAsync()
+    public override async System.Threading.Tasks.Task InitializeAsync()
     {
         SetupIoC(Services);
 
@@ -27,13 +25,6 @@ public class Host : UnitTestHost
 
     public override async System.Threading.Tasks.ValueTask DisposeAsync()
     {
-        if (ServiceProvider != null)
-        {
-            var sink = ServiceProvider.GetService<IInjectableTestOutputSink>();
-            if (sink != null)
-                await sink.DisposeAsync();
-        }
-
         await base.DisposeAsync();
     }
 }
