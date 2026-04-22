@@ -1,7 +1,6 @@
 using BenchmarkDotNet.Reports;
 using BenchmarkDotNet.Running;
 using Soenneker.Benchmarking.Extensions.Summary;
-using Soenneker.Facts.Manual;
 using Soenneker.Tests.Benchmark;
 
 namespace Soenneker.Extensions.Object.Tests.Benchmarks;
@@ -13,7 +12,7 @@ public class BenchmarkTestRunner : BenchmarkTest
     {
     }
 
-    [ManualFact]
+    [Skip("Manual")]
     //[LocalOnly]
     public async System.Threading.Tasks.Task ExtensionBenchmarks()
     {
