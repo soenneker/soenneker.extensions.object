@@ -3,11 +3,6 @@ using BenchmarkDotNet.Running;
 using Soenneker.Benchmarking.Extensions.Summary;
 using Soenneker.Tests.Benchmark;
 
-using BenchmarkDotNet.Reports;
-using BenchmarkDotNet.Running;
-using Soenneker.Benchmarking.Extensions.Summary;
-using Soenneker.Tests.Benchmark;
-
 namespace Soenneker.Extensions.Object.Tests.Benchmarks;
 
 [ClassDataSource<Host>(Shared = SharedType.PerTestSession)]
@@ -26,6 +21,3 @@ public class BenchmarkTestRunner : BenchmarkTest
         await summary.OutputSummaryToLog();
     }
 }
-
-
-
