@@ -8,6 +8,9 @@ using Soenneker.Utils.Json;
 
 namespace Soenneker.Extensions.Object;
 
+/// <summary>
+/// Represents the object extension.
+/// </summary>
 public static partial class ObjectExtension
 {
     private static readonly byte[] _emptyByteArray = [];

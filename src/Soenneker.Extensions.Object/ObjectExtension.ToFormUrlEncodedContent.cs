@@ -8,6 +8,9 @@ using System.Text.Json.Serialization;
 
 namespace Soenneker.Extensions.Object;
 
+/// <summary>
+/// Represents the object extension.
+/// </summary>
 public static partial class ObjectExtension
 {
     private static readonly ConcurrentDictionary<System.Type, (PropertyInfo[] Props, string[] Names)> _formUrlEncodedPropCache = new();
