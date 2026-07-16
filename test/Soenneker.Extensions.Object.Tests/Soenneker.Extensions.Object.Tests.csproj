@@ -18,7 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Soenneker.Dtos.StreetAddress" Version="4.0.514" />
+        <PackageReference Include="Soenneker.Dtos.StreetAddress" Version="4.0.515" />
         <PackageReference Include="Soenneker.Tests.Attributes.Local" Version="4.0.54" />
         <PackageReference Include="Soenneker.Tests.Benchmark" Version="4.0.125" />
         <PackageReference Include="Soenneker.Tests.HostedUnit" Version="4.0.126" />
