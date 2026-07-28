@@ -22,7 +22,7 @@
         <PackageReference Include="Soenneker.Tests.Attributes.Local" Version="4.0.64" />
         <PackageReference Include="Soenneker.Tests.Benchmark" Version="4.0.134" />
         <PackageReference Include="Soenneker.Tests.HostedUnit" Version="4.0.157" />
-        <PackageReference Include="Soenneker.Utils.Test" Version="4.0.322" />
+        <PackageReference Include="Soenneker.Utils.Test" Version="4.0.323" />
         <PackageReference Include="TUnit" Version="1.61.38" />
     </ItemGroup>
 
