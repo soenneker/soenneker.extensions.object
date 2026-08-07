@@ -21,7 +21,7 @@
         <PackageReference Include="Soenneker.Dtos.StreetAddress" Version="4.0.518" />
         <PackageReference Include="Soenneker.Tests.Attributes.Local" Version="4.0.69" />
         <PackageReference Include="Soenneker.Tests.Benchmark" Version="4.0.137" />
-        <PackageReference Include="Soenneker.Tests.HostedUnit" Version="4.0.169" />
+        <PackageReference Include="Soenneker.Tests.HostedUnit" Version="4.0.170" />
         <PackageReference Include="Soenneker.Utils.Test" Version="4.0.323" />
         <PackageReference Include="TUnit" Version="1.63.0" />
     </ItemGroup>
