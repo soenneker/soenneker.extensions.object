@@ -11,6 +11,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Globalization;
+using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Soenneker.Utils.PooledStringBuilders;
@@ -24,6 +26,9 @@ public static partial class ObjectExtension
 {
     private static readonly ConcurrentDictionary<System.Type, (PropertyInfo[] Props, string[] Names)> _declaredPropCache = new();
     private static readonly ConcurrentDictionary<System.Type, PropertyInfo[]> _publicPropCache = new();
+    private static readonly ConcurrentDictionary<System.Type, QueryProperty[]> _queryPropertyCache = new();
+
+    private sealed record QueryProperty(string Name, Func<object, object?> Getter, JsonIgnoreCondition IgnoreCondition, System.Type PropertyType);
 
     /// <summary>
     /// Determines whether the specified object is of a numeric type.
@@ -170,9 +175,9 @@ public static partial class ObjectExtension
     }
 
     /// <summary>
-    /// Builds a query string out of an object by serializing the object and then deserializing into a Dictionary. <para/>
+    /// Builds a query string from cached property accessors. <para/>
     /// Uses the object's property name OR 'JsonPropertyName' attribute as the keys of the query string. Escapes the value. <para/>
-    /// This is recommended over <see cref="ToQueryStringViaReflection"/> as it's slightly faster. <para/>
+    /// Uses JSON-compatible property names and scalar formatting without serializing the containing object. <para/>
     /// </summary>
     /// <remarks>This string's first character is a question mark (unless the object is null, then it's null)</remarks>
     /// <returns>If object is null, returns an empty string.</returns>
@@ -182,38 +187,80 @@ public static partial class ObjectExtension
         if (obj is null)
             return "";
 
-        string? serializedObj = JsonUtil.Serialize(obj);
+        QueryProperty[] properties = _queryPropertyCache.GetOrAdd(obj.GetType(), static type => CreateQueryProperties(type));
+        using var queryBuilder = new PooledStringBuilder(properties.Length * 10);
 
-        if (serializedObj.IsNullOrEmpty())
-            return "";
-
-        var dictionary = JsonUtil.Deserialize<Dictionary<string, JsonElement>>(serializedObj);
-
-        if (dictionary is null || dictionary.Count == 0)
-            return "";
-
-        using var queryBuilder = new PooledStringBuilder(dictionary.Count * 10);
-        queryBuilder.Append('?');
-
-        foreach (KeyValuePair<string, JsonElement> qs in dictionary)
+        for (var i = 0; i < properties.Length; i++)
         {
-            string value = qs.Value.ValueKind switch
-            {
-                JsonValueKind.True => "true",
-                JsonValueKind.False => "false",
-                _ => qs.Value.ToString()
-                       .ToEscaped()
-            };
+            QueryProperty property = properties[i];
+            object? raw = property.Getter(obj);
 
-            if (queryBuilder.Length > 1)
-                queryBuilder.Append('&');
+            if (ShouldIgnoreQueryValue(raw, property))
+                continue;
 
-            queryBuilder.Append(qs.Key);
+            queryBuilder.Append(queryBuilder.Length == 0 ? '?' : '&');
+            queryBuilder.Append(property.Name);
             queryBuilder.Append('=');
-            queryBuilder.Append(value);
+            queryBuilder.Append(FormatQueryValue(raw));
         }
 
         return queryBuilder.ToString();
+    }
+
+    private static QueryProperty[] CreateQueryProperties(System.Type type)
+    {
+        PropertyInfo[] properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public);
+        var result = new List<QueryProperty>(properties.Length);
+
+        foreach (PropertyInfo property in properties)
+        {
+            if (!property.CanRead || property.GetIndexParameters().Length != 0)
+                continue;
+
+            JsonIgnoreCondition ignoreCondition = property.GetCustomAttribute<JsonIgnoreAttribute>()?.Condition ?? JsonIgnoreCondition.WhenWritingNull;
+            if (ignoreCondition == JsonIgnoreCondition.Always)
+                continue;
+
+            string name = property.GetCustomAttribute<JsonPropertyNameAttribute>()?.Name ?? JsonNamingPolicy.CamelCase.ConvertName(property.Name);
+            ParameterExpression instance = Expression.Parameter(typeof(object), "instance");
+            UnaryExpression converted = Expression.Convert(instance, type);
+            MemberExpression access = Expression.Property(converted, property);
+            UnaryExpression boxed = Expression.Convert(access, typeof(object));
+            Func<object, object?> getter = Expression.Lambda<Func<object, object?>>(boxed, instance).Compile();
+            result.Add(new QueryProperty(name, getter, ignoreCondition, property.PropertyType));
+        }
+
+        return result.ToArray();
+    }
+
+    private static bool ShouldIgnoreQueryValue(object? value, QueryProperty property)
+    {
+        if (value is null)
+            return property.IgnoreCondition is JsonIgnoreCondition.WhenWritingNull or JsonIgnoreCondition.WhenWritingDefault;
+
+        if (property.IgnoreCondition != JsonIgnoreCondition.WhenWritingDefault || !property.PropertyType.IsValueType)
+            return false;
+
+        return value.Equals(Activator.CreateInstance(property.PropertyType));
+    }
+
+    private static string FormatQueryValue(object? value)
+    {
+        if (value is null)
+            return string.Empty;
+
+        string text = value switch
+        {
+            string stringValue => stringValue,
+            bool boolValue => boolValue ? "true" : "false",
+            char charValue => charValue.ToString(),
+            Enum enumValue => enumValue.ToString(),
+            IFormattable formattable when value.GetType().IsPrimitive || value is decimal or DateTime or DateTimeOffset or Guid =>
+                formattable.ToString(null, CultureInfo.InvariantCulture) ?? string.Empty,
+            _ => JsonSerializer.SerializeToElement(value, value.GetType()).ToString()
+        };
+
+        return text.ToEscaped();
     }
 
     /// <summary>
