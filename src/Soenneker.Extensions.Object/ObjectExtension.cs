@@ -88,6 +88,7 @@ public static partial class ObjectExtension
     /// Uses Reflection to build a query string out of an object. If object is null, returns an empty string. Uses the object's property names as the keys of the query string.
     /// </summary>
     /// <remarks>This string's first character is a question mark (unless the object is null, then it's null)</remarks>
+    /// <returns>Uses Reflection to build a query string out of an object. If object is null, returns an empty string. Uses the object's property names as the keys of the query string.</returns>
     [Pure]
     public static string ToQueryStringViaReflection(this object? obj, bool loweredPropertyNames = true)
     {

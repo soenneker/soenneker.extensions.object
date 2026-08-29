@@ -20,6 +20,7 @@ public static partial class ObjectExtension
     /// honoring JsonPropertyName attributes on properties.
     /// Only top-level, readable instance properties are included.
     /// </summary>
+    /// <returns>Converts an object into FormUrlEncodedContent using reflection, honoring JsonPropertyName attributes on properties. Only top-level, readable instance properties are included.</returns>
     public static FormUrlEncodedContent ToFormUrlEncodedContent(this object obj)
     {
         if (obj is null)
