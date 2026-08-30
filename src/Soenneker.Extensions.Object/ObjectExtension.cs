@@ -150,7 +150,7 @@ public static partial class ObjectExtension
                 continue;
 
             queryBuilder.Append(queryBuilder.Length == 0 ? '?' : '&');
-            queryBuilder.Append(property.Name);
+            queryBuilder.Append(property.Name.ToEscaped());
             queryBuilder.Append('=');
             queryBuilder.Append(FormatQueryValue(raw));
         }

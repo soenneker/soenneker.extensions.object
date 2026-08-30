@@ -3,6 +3,7 @@ using Soenneker.Extensions.Object.Tests.Dtos;
 using Soenneker.Tests.HostedUnit;
 using Soenneker.Utils.Json;
 using System;
+using System.Text.Json.Serialization;
 
 namespace Soenneker.Extensions.Object.Tests;
 
@@ -66,6 +67,14 @@ public class ObjectExtensionTests : HostedUnitTest
     }
 
     [Test]
+    public void ToQueryString_escapes_json_property_names()
+    {
+        string result = new QueryNameModel {Value = "safe"}.ToQueryString();
+
+        result.Should().Be("?name%26admin=safe");
+    }
+
+    [Test]
     public void LogNullProperties_should_log()
     {
         var obj = AutoFaker.Generate<UserDto>();
@@ -82,6 +91,12 @@ public class ObjectExtensionTests : HostedUnitTest
         obj.PhoneNumber = null!;
 
         obj.LogNullPropertiesRecursivelyAsJson(Logger);
+    }
+
+    private sealed class QueryNameModel
+    {
+        [JsonPropertyName("name&admin")]
+        public required string Value { get; init; }
     }
 
     [Test]
