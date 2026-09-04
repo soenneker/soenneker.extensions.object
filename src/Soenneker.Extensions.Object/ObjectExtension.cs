@@ -230,6 +230,9 @@ public static partial class ObjectExtension
             return;
         }
 
+        if (!logger.IsEnabled(LogLevel.Information))
+            return;
+
         System.Type objectType = obj.GetType();
         PropertyInfo[] properties = GetReadablePublicProperties(objectType);
         var nullProperties = new List<string>(properties.Length);
@@ -265,6 +268,9 @@ public static partial class ObjectExtension
             logger.LogWarning("LogNullPropertiesAsJson: Object is null");
             return;
         }
+
+        if (!logger.IsEnabled(LogLevel.Information))
+            return;
 
         System.Type objectType = obj.GetType();
 
