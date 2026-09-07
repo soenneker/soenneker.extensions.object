@@ -150,7 +150,7 @@ public static partial class ObjectExtension
                 continue;
 
             queryBuilder.Append(queryBuilder.Length == 0 ? '?' : '&');
-            queryBuilder.Append(property.Name.ToEscaped());
+            queryBuilder.Append(property.Name);
             queryBuilder.Append('=');
             queryBuilder.Append(FormatQueryValue(raw));
         }
@@ -181,7 +181,7 @@ public static partial class ObjectExtension
             object? defaultValue = ignoreCondition == JsonIgnoreCondition.WhenWritingDefault && property.PropertyType.IsValueType
                 ? Activator.CreateInstance(property.PropertyType)
                 : null;
-            result.Add(new QueryProperty(name, getter, ignoreCondition, property.PropertyType, defaultValue));
+            result.Add(new QueryProperty(name.ToEscaped(), getter, ignoreCondition, property.PropertyType, defaultValue));
         }
 
         return result.ToArray();
@@ -406,17 +406,36 @@ public static partial class ObjectExtension
         if (obj == null)
             return "null";
 
+        var stringBuilder = new PooledStringBuilder();
+        try
+        {
+            AppendReadableString(obj, indentLevel, ref stringBuilder);
+            return stringBuilder.ToString();
+        }
+        finally
+        {
+            stringBuilder.Dispose();
+        }
+    }
+
+    private static void AppendReadableString(object? obj, int indentLevel, ref PooledStringBuilder stringBuilder)
+    {
+        if (obj is null)
+        {
+            stringBuilder.Append("null");
+            return;
+        }
+
         System.Type type = obj.GetType();
         PropertyInfo[] properties = GetReadablePublicProperties(type);
-        using var stringBuilder = new PooledStringBuilder();
-
-        var indent = new string(' ', indentLevel * 2);
+        int indentLength = indentLevel * 2;
+        ArgumentOutOfRangeException.ThrowIfNegative(indentLength, "count");
 
         foreach (PropertyInfo property in properties)
         {
             object? value = property.GetValue(obj, null);
 
-            stringBuilder.Append(indent);
+            stringBuilder.Append(' ', indentLength);
             stringBuilder.Append(property.Name);
             stringBuilder.Append(':');
 
@@ -431,7 +450,7 @@ public static partial class ObjectExtension
 
                 foreach (object? item in enumerable)
                 {
-                    stringBuilder.Append(item.ToReadableString(indentLevel + 1));
+                    AppendReadableString(item, indentLevel + 1, ref stringBuilder);
                 }
             }
             else if (value.GetType()
@@ -439,7 +458,7 @@ public static partial class ObjectExtension
                                             .IsPrimitive && value is not string)
             {
                 stringBuilder.AppendLine();
-                stringBuilder.Append(value.ToReadableString(indentLevel + 1));
+                AppendReadableString(value, indentLevel + 1, ref stringBuilder);
             }
             else
             {
@@ -448,8 +467,6 @@ public static partial class ObjectExtension
                 stringBuilder.AppendLine();
             }
         }
-
-        return stringBuilder.ToString();
     }
 
     private static PropertyInfo[] GetReadablePublicProperties(System.Type type) =>
