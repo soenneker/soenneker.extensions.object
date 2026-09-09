@@ -40,8 +40,8 @@
         <None Include="..\..\LICENSE" Pack="true" PackagePath="\" />
         <None Include="..\..\icon.png" Pack="true" PackagePath="\" />
         <PackageReference Include="Soenneker.Constants.Auth" Version="4.0.619" />
-        <PackageReference Include="Soenneker.Extensions.Enumerable.String" Version="4.0.1443" />
+        <PackageReference Include="Soenneker.Extensions.Enumerable.String" Version="4.0.1444" />
         <PackageReference Include="Soenneker.Extensions.Type" Version="4.0.699" />
-        <PackageReference Include="Soenneker.Utils.Json" Version="4.0.2689" />
+        <PackageReference Include="Soenneker.Utils.Json" Version="4.0.2690" />
     </ItemGroup>
 </Project>
