@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.Contracts;
+using System.Text.Json.Serialization.Metadata;
+using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Mime;
@@ -16,7 +17,7 @@ public static partial class ObjectExtension
     private static readonly byte[] _emptyByteArray = [];
 
     /// <summary>
-    /// Converts an object to an <see cref="HttpContent"/> with JSON content using <see cref="JsonUtil.WebOptions"/>.
+    /// Converts an object to an <see cref="HttpContent"/> with JSON content using caller-supplied metadata.
     /// </summary>
     /// <param name="obj">The object to serialize into JSON content.</param>
     /// <returns>
@@ -26,8 +27,9 @@ public static partial class ObjectExtension
     /// <remarks>
     /// This method does not log the result. For logging options, see <see cref="JsonUtil"/>.
     /// </remarks>
+    /// <param name="typeInfo">Source-generated JSON metadata and serialization options for the value.</param>
     [Pure]
-    public static HttpContent ToHttpContent(this object? obj)
+    public static HttpContent ToHttpContent<T>(this T obj, JsonTypeInfo<T> typeInfo)
     {
         HttpContent httpContent;
 
@@ -40,7 +42,7 @@ public static partial class ObjectExtension
         }
         else
         {
-            byte[] utf8Bytes = JsonUtil.SerializeToUtf8Bytes(obj);
+            byte[] utf8Bytes = JsonUtil.SerializeToUtf8Bytes(obj, typeInfo);
 
             httpContent = new ByteArrayContent(utf8Bytes)
             {
@@ -68,12 +70,13 @@ public static partial class ObjectExtension
     /// </list>
     /// </returns>
     /// <remarks>
-    /// Uses JsonUtil.WebOptions for JSON serialization.
+    /// Uses the options associated with the supplied metadata.
     /// </remarks>
+    /// <param name="typeInfo">Source-generated JSON metadata and serialization options for the value.</param>
     [Pure] 
-    public static (HttpContent httpContent, string str) ToHttpContentAndString(this object? obj)
+    public static (HttpContent httpContent, string str) ToHttpContentAndString<T>(this T obj, JsonTypeInfo<T> typeInfo)
     {
-        string? jsonContent = obj != null ? JsonUtil.Serialize(obj) : "";
+        string? jsonContent = obj != null ? JsonUtil.Serialize(obj, typeInfo) : "";
 
         var content = new StringContent(jsonContent!, Encoding.UTF8, MediaTypeNames.Application.Json);
         return (content, jsonContent!);
@@ -92,10 +95,11 @@ public static partial class ObjectExtension
     /// This method calls <see cref="ToHttpContent"/> to create the <see cref="HttpContent"/> 
     /// and adds the 'x-api-key' header using HttpHeaders.TryAddWithoutValidation.
     /// </remarks>
+    /// <param name="typeInfo">Source-generated JSON metadata and serialization options for the value.</param>
     [Pure]
-    public static HttpContent ToHttpContentWithKey(this object? obj, string apiKey)
+    public static HttpContent ToHttpContentWithKey<T>(this T obj, JsonTypeInfo<T> typeInfo, string apiKey)
     {
-        var httpContent = obj.ToHttpContent();
+        var httpContent = obj.ToHttpContent(typeInfo);
         httpContent.Headers.TryAddWithoutValidation(AuthConstants.XApiKey, apiKey);
 
         return httpContent;

@@ -22,7 +22,7 @@ public class ObjectExtensionTests : HostedUnitTest
     {
         var obj = AutoFaker.Generate<UserDto>();
 
-        var result = obj.ToHttpContent();
+        var result = obj.ToHttpContent(TestJsonContext.Get<UserDto>());
         result.Should().NotBeNull();
     }
 
@@ -31,7 +31,7 @@ public class ObjectExtensionTests : HostedUnitTest
     {
         var obj = AutoFaker.Generate<UserDto>();
 
-        var result = obj.ToHttpContent();
+        var result = obj.ToHttpContent(TestJsonContext.Get<UserDto>());
         string content = await result.ReadAsStringAsync(System.Threading.CancellationToken.None);
         JsonUtil.Deserialize<UserDto>(content).Should().BeEquivalentTo(obj);
     }

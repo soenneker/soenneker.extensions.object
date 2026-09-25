@@ -279,7 +279,7 @@ public static partial class ObjectExtension
 
         if (nullPropertiesTree.Count > 0)
         {
-            string? jsonString = JsonUtil.Serialize(nullPropertiesTree);
+            string? jsonString = JsonUtil.Serialize(nullPropertiesTree, LibraryJsonContext.Get<Dictionary<string, object?>>());
             logger.LogInformation("LogNullPropertiesAsJson: Type ({objectType}), Null properties tree: {jsonString}", objectType.FullName, jsonString);
         }
         else

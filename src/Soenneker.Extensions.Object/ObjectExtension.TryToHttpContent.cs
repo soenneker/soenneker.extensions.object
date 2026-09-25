@@ -1,4 +1,5 @@
-﻿using System;
+using System.Text.Json.Serialization.Metadata;
+using System;
 using System.Diagnostics.Contracts;
 using System.Net.Http;
 using Microsoft.Extensions.Logging;
@@ -21,12 +22,13 @@ public static partial class ObjectExtension
     /// An <see cref="HttpContent"/> containing the JSON representation of the object,
     /// or <c>null</c> if serialization fails.
     /// </returns>
+    /// <param name="typeInfo">Source-generated JSON metadata and serialization options for the value.</param>
     [Pure]
-    public static HttpContent? TryToHttpContent(this object? obj, ILogger? logger = null)
+    public static HttpContent? TryToHttpContent<T>(this T obj, JsonTypeInfo<T> typeInfo, ILogger? logger = null)
     {
         try
         {
-            return ToHttpContent(obj);
+            return ToHttpContent(obj, typeInfo);
         } 
         catch (JsonSerializationException ex)
         {
@@ -52,12 +54,13 @@ public static partial class ObjectExtension
     /// A tuple containing an <see cref="HttpContent"/> and the serialized JSON string.
     /// If serialization fails, returns <c>null</c> for both values.
     /// </returns>
+    /// <param name="typeInfo">Source-generated JSON metadata and serialization options for the value.</param>
     [Pure]
-    public static (HttpContent? httpContent, string? str) TryToHttpContentAndString(this object? obj, ILogger? logger = null)
+    public static (HttpContent? httpContent, string? str) TryToHttpContentAndString<T>(this T obj, JsonTypeInfo<T> typeInfo, ILogger? logger = null)
     {
         try
         {
-            return ToHttpContentAndString(obj);
+            return ToHttpContentAndString(obj, typeInfo);
         }
         catch (JsonSerializationException ex)
         {
@@ -83,12 +86,13 @@ public static partial class ObjectExtension
     /// <returns> 
     /// An <see cref="HttpContent"/> with the 'x-api-key' header added, or <c>null</c> if an error occurs.
     /// </returns>
+    /// <param name="typeInfo">Source-generated JSON metadata and serialization options for the value.</param>
     [Pure]
-    public static HttpContent? TryToHttpContentWithKey(this object? obj, string apiKey, ILogger? logger = null)
+    public static HttpContent? TryToHttpContentWithKey<T>(this T obj, JsonTypeInfo<T> typeInfo, string apiKey, ILogger? logger = null)
     {
         try
         {
-            return ToHttpContentWithKey(obj, apiKey);
+            return ToHttpContentWithKey(obj, typeInfo, apiKey);
         }
         catch (JsonSerializationException ex)
         {
