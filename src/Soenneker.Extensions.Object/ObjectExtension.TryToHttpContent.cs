@@ -3,7 +3,7 @@ using System;
 using System.Diagnostics.Contracts;
 using System.Net.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace Soenneker.Extensions.Object;
 
@@ -30,7 +30,7 @@ public static partial class ObjectExtension
         {
             return ToHttpContent(obj, typeInfo);
         } 
-        catch (JsonSerializationException ex)
+        catch (JsonException ex)
         {
             logger?.LogError(ex, "Failed to serialize object to HttpContent for type ({type})", obj?.GetType()
                 .Name);
@@ -62,7 +62,7 @@ public static partial class ObjectExtension
         {
             return ToHttpContentAndString(obj, typeInfo);
         }
-        catch (JsonSerializationException ex)
+        catch (JsonException ex)
         {
             logger?.LogError(ex, "Failed to serialize object to HttpContent for type ({type})", obj?.GetType()
                 .Name);
@@ -94,7 +94,7 @@ public static partial class ObjectExtension
         {
             return ToHttpContentWithKey(obj, typeInfo, apiKey);
         }
-        catch (JsonSerializationException ex)
+        catch (JsonException ex)
         {
             logger?.LogError(ex, "Failed to serialize object to HttpContent for type ({type})", obj?.GetType()
                 .Name);
