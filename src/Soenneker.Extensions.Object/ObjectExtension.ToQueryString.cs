@@ -3,6 +3,7 @@ using System.Diagnostics.Contracts;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
+using Soenneker.Utils.Json;
 
 namespace Soenneker.Extensions.Object;
 
@@ -30,7 +31,8 @@ public static partial class ObjectExtension
         if (obj is null)
             return string.Empty;
 
-        JsonElement element = JsonSerializer.SerializeToElement(obj, typeInfo);
+        using JsonDocument document = JsonDocument.Parse(JsonUtil.SerializeToUtf8Bytes(obj, typeInfo));
+        JsonElement element = document.RootElement;
         if (element.ValueKind != JsonValueKind.Object)
             throw new ArgumentException("The value must serialize as a JSON object.", nameof(obj));
 
