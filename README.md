@@ -29,4 +29,4 @@ using HttpContent content = request.ToHttpContent(MyJsonContext.Default.SearchRe
 
 ## Reflection extensions
 
-For `ToDictionary()`, query strings, form encoding, property diagnostics, and `ToHttpContent()` without metadata, install [Soenneker.Extensions.Objects.Reflection](https://github.com/soenneker/soenneker.extensions.objects.reflection) and import `Soenneker.Extensions.Objects.Reflection`.
+For `ToDictionaryViaReflection()`, query strings, form encoding, property diagnostics, and `ToHttpContentViaReflection()`, install [Soenneker.Extensions.Objects.Reflection](https://github.com/soenneker/soenneker.extensions.objects.reflection) and import `Soenneker.Extensions.Objects.Reflection`.
