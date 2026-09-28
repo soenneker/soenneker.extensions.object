@@ -31,8 +31,8 @@ public static partial class ObjectExtension
         if (obj is null)
             return string.Empty;
 
-        using JsonDocument document = JsonDocument.Parse(JsonUtil.SerializeToUtf8Bytes(obj, typeInfo));
-        JsonElement element = document.RootElement;
+        JsonElement element = JsonUtil.SerializeToElement(obj, typeInfo);
+
         if (element.ValueKind != JsonValueKind.Object)
             throw new ArgumentException("The value must serialize as a JSON object.", nameof(obj));
 
