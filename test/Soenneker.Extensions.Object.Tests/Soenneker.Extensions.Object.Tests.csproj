@@ -19,11 +19,11 @@
 
     <ItemGroup>
         <PackageReference Include="Soenneker.Dtos.StreetAddress" Version="4.0.532" />
-        <PackageReference Include="Soenneker.Tests.Attributes.Local" Version="4.0.124" />
-        <PackageReference Include="Soenneker.Tests.Benchmark" Version="4.0.174" />
-        <PackageReference Include="Soenneker.Tests.HostedUnit" Version="4.0.294" />
+        <PackageReference Include="Soenneker.Tests.Attributes.Local" Version="4.0.125" />
+        <PackageReference Include="Soenneker.Tests.Benchmark" Version="4.0.176" />
+        <PackageReference Include="Soenneker.Tests.HostedUnit" Version="4.0.297" />
         <PackageReference Include="Soenneker.Utils.Test" Version="4.0.331" />
-        <PackageReference Include="TUnit" Version="1.69.24" />
+        <PackageReference Include="TUnit" Version="1.70.1" />
     </ItemGroup>
 
     <ItemGroup>
