@@ -22,6 +22,14 @@ using HttpContent content = request.ToHttpContent(MyJsonContext.Default.SearchRe
 
 `ToHttpContent()`, `ToHttpContentAndString()`, and `ToHttpContentWithKey()` accept `JsonTypeInfo<T>` metadata. Their `Try` variants return null results and optionally log conversion errors. The caller owns and must dispose returned content objects.
 
+## Build query strings without reflection
+
+```csharp
+string query = request.ToQueryString(MyJsonContext.Default.SearchRequest);
+```
+
+Pass source-generated `JsonTypeInfo<T>` metadata, as with the HTTP-content helpers. Names, ignore conditions, and converters follow that metadata. Names and values are percent-encoded, booleans and numbers use JSON formatting, and nested objects and arrays are encoded as JSON. Null inputs and empty objects return an empty string; non-object JSON roots are rejected.
+
 ## Guards
 
 - `IsObjectNumeric()` checks whether an object's runtime type is numeric; null throws.
