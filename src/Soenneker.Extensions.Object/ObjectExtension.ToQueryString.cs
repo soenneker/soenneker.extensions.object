@@ -1,9 +1,9 @@
 using System;
 using System.Diagnostics.Contracts;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using Soenneker.Utils.Json;
+using Soenneker.Utils.PooledStringBuilders;
 
 namespace Soenneker.Extensions.Object;
 
@@ -36,7 +36,7 @@ public static partial class ObjectExtension
         if (element.ValueKind != JsonValueKind.Object)
             throw new ArgumentException("The value must serialize as a JSON object.", nameof(obj));
 
-        var builder = new StringBuilder();
+        using var builder = new PooledStringBuilder();
         foreach (JsonProperty property in element.EnumerateObject())
         {
             builder.Append(builder.Length == 0 ? '?' : '&');
