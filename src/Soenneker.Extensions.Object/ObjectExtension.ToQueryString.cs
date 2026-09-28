@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Diagnostics.Contracts;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
@@ -36,22 +37,80 @@ public static partial class ObjectExtension
         if (element.ValueKind != JsonValueKind.Object)
             throw new ArgumentException("The value must serialize as a JSON object.", nameof(obj));
 
-        using var builder = new PooledStringBuilder();
-        foreach (JsonProperty property in element.EnumerateObject())
-        {
-            builder.Append(builder.Length == 0 ? '?' : '&');
-            builder.Append(Uri.EscapeDataString(property.Name));
-            builder.Append('=');
+        Span<char> initialBuffer = stackalloc char[256];
+        Span<char> escapeBuffer = stackalloc char[256];
 
-            string value = property.Value.ValueKind switch
+        var builder = new PooledStringBuilder(initialBuffer);
+
+        try
+        {
+            foreach (JsonProperty property in element.EnumerateObject())
             {
-                JsonValueKind.String => property.Value.GetString()!,
-                JsonValueKind.Null => string.Empty,
-                _ => property.Value.GetRawText()
-            };
-            builder.Append(Uri.EscapeDataString(value));
+                builder.Append(builder.Length == 0 ? '?' : '&');
+
+                AppendEscaped(ref builder, property.Name, escapeBuffer);
+                builder.Append('=');
+
+                JsonElement value = property.Value;
+
+                switch (value.ValueKind)
+                {
+                    case JsonValueKind.Null:
+                        break;
+
+                    case JsonValueKind.True:
+                        builder.Append("true");
+                        break;
+
+                    case JsonValueKind.False:
+                        builder.Append("false");
+                        break;
+
+                    case JsonValueKind.String:
+                        AppendEscaped(ref builder, value.GetString(), escapeBuffer);
+                        break;
+
+                    default:
+                        AppendEscaped(ref builder, value.GetRawText(), escapeBuffer);
+                        break;
+                }
+            }
+
+            return builder.ToString();
+        }
+        finally
+        {
+            builder.Dispose();
+        }
+    }
+
+    private static void AppendEscaped(ref PooledStringBuilder builder, string? value, Span<char> scratch)
+    {
+        if (string.IsNullOrEmpty(value))
+            return;
+
+        if (Uri.TryEscapeDataString(value.AsSpan(), scratch, out int written))
+        {
+            builder.Append(scratch[..written]);
+            return;
         }
 
-        return builder.ToString();
+        // At most 3 UTF-8 bytes per UTF-16 code unit, each escaped as %XX.
+        int capacity = checked(value.Length * 9);
+        char[] rented = ArrayPool<char>.Shared.Rent(capacity);
+
+        try
+        {
+            if (!Uri.TryEscapeDataString(value.AsSpan(), rented.AsSpan(), out written))
+            {
+                throw new InvalidOperationException("The URI escaping buffer was too small.");
+            }
+
+            builder.Append(rented.AsSpan(0, written));
+        }
+        finally
+        {
+            ArrayPool<char>.Shared.Return(rented);
+        }
     }
 }

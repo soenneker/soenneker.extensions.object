@@ -20,8 +20,7 @@ public static partial class ObjectExtension
     [Pure]
     public static bool IsObjectNumeric(this object obj)
     {
-        return obj.GetType()
-                  .IsNumeric();
+        return obj.GetType().IsNumeric();
     }
 
     /// <summary>

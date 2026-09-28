@@ -28,7 +28,7 @@ public static partial class ObjectExtension
     {
         try
         {
-            return ToHttpContent(obj, typeInfo);
+            return obj.ToHttpContent(typeInfo);
         } 
         catch (JsonException ex)
         {
@@ -60,7 +60,7 @@ public static partial class ObjectExtension
     {
         try
         {
-            return ToHttpContentAndString(obj, typeInfo);
+            return obj.ToHttpContentAndString(typeInfo);
         }
         catch (JsonException ex)
         {
@@ -92,7 +92,7 @@ public static partial class ObjectExtension
     {
         try
         {
-            return ToHttpContentWithKey(obj, typeInfo, apiKey);
+            return obj.ToHttpContentWithKey(typeInfo, apiKey);
         }
         catch (JsonException ex)
         {
