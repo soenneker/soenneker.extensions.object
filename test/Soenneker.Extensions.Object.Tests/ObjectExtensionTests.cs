@@ -27,7 +27,7 @@ public class ObjectExtensionTests : HostedUnitTest
     }
 
     [Test]
-    public async System.Threading.Tasks.Task ToHttpContent_should_deserialize()
+    public async System.Threading.Tasks.ValueTask ToHttpContent_should_deserialize()
     {
         var obj = AutoFaker.Generate<UserDto>();
 
