@@ -4,6 +4,7 @@ using Soenneker.Tests.HostedUnit;
 using Soenneker.Utils.Json;
 using System;
 using System.Text.Json.Serialization;
+using System.Threading;
 
 namespace Soenneker.Extensions.Object.Tests;
 
@@ -27,12 +28,12 @@ public class ObjectExtensionTests : HostedUnitTest
     }
 
     [Test]
-    public async System.Threading.Tasks.ValueTask ToHttpContent_should_deserialize()
+    public async System.Threading.Tasks.ValueTask ToHttpContent_should_deserialize(CancellationToken cancellationToken)
     {
         var obj = AutoFaker.Generate<UserDto>();
 
         var result = obj.ToHttpContent(TestJsonContext.Get<UserDto>());
-        string content = await result.ReadAsStringAsync(System.Threading.CancellationToken.None);
+        string content = await result.ReadAsStringAsync(cancellationToken);
         JsonUtil.Deserialize<UserDto>(content).Should().BeEquivalentTo(obj);
     }
 
