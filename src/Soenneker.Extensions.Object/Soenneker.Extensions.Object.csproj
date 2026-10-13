@@ -45,6 +45,6 @@
         <PackageReference Include="Soenneker.Constants.Auth" Version="4.0.624" />
         <PackageReference Include="Soenneker.Extensions.Type" Version="4.0.707" />
         <PackageReference Include="Soenneker.Utils.Json" Version="4.0.2738" />
-        <PackageReference Include="Soenneker.Utils.PooledStringBuilders" Version="4.0.35" />
+        <PackageReference Include="Soenneker.Utils.PooledStringBuilders" Version="4.0.37" />
     </ItemGroup>
 </Project>
