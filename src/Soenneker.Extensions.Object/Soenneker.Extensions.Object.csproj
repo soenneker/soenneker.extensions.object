@@ -42,7 +42,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Soenneker.Constants.Auth" Version="4.0.625" />
+        <PackageReference Include="Soenneker.Constants.Auth" Version="4.0.628" />
         <PackageReference Include="Soenneker.Extensions.Type" Version="4.0.711" />
         <PackageReference Include="Soenneker.Utils.Json" Version="4.0.2742" />
         <PackageReference Include="Soenneker.Utils.PooledStringBuilders" Version="4.0.37" />
